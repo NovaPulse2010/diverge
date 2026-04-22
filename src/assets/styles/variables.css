@@ -1,0 +1,34 @@
+:root {
+  /* 格子尺寸 */
+  --grid-size: 52px;
+  --grid-size-sm: 40px;
+  --grid-border-width: 1.5px;
+  --grid-guide-width: 0.8px;
+
+  /* 颜色 */
+  --color-lightgray: #c0c0c0;
+  --color-black: #222;
+  --color-blue: #1a5fb4;
+  --color-red: #dc3545;
+  --grid-border-color: #dc3545;
+  --grid-guide-color: #e8a0a8;
+
+  /* 字体 */
+  --font-kai: 'LXGW WenKai', 'KaiTi', 'STKaiti', serif;
+  --font-english: 'Caveat', cursive;
+  --font-ui: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+
+  /* 布局 */
+  --panel-width: 296px;
+  --page-padding: 15mm;
+
+  /* UI 颜色 */
+  --bg-app: #e8ecf2;
+  --bg-panel: #ffffff;
+  --bg-card: #f6f8fa;
+  --border-color: #eaeef3;
+  --text-primary: #1a1a2e;
+  --text-secondary: #6b7280;
+  --accent: #2979d9;
+  --accent-hover: #1a5fb4;
+}
