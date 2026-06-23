@@ -11,7 +11,7 @@ This project is a Vite static frontend. The GitHub Actions workflow in `.github/
 ### Server prerequisites
 
 1. Install Nginx on the server.
-2. Create a deploy directory. The workflow defaults to `/var/www/diverge`.
+2. Create a dedicated deploy directory for this app. The workflow defaults to `/var/www/diverge` and rejects web root directories such as `/www`, `/var/www`, or `/www/wwwroot`.
 3. Make sure the SSH deploy user can write to that directory.
 4. Point Nginx to the deploy directory.
 
@@ -50,6 +50,8 @@ Add this variable under `Settings -> Secrets and variables -> Actions -> Variabl
 
 | Variable      | Default            | Description               |
 | ------------- | ------------------ | ------------------------- |
-| `DEPLOY_PATH` | `/var/www/diverge` | Directory served by Nginx |
+| `DEPLOY_PATH` | `/var/www/diverge` | Dedicated directory served by Nginx. It must end with `/diverge`. |
 
 The workflow runs on pushes to `main` or `master`. Push deployments use `DEPLOY_PATH`, or `/var/www/diverge` if the variable is not set. Manual deployments can override the directory from the Actions tab by filling `deploy_path`; leave it blank to use the repository variable. If `DEPLOY_PATH` was previously added as a secret, the workflow also supports that as a fallback.
+
+Before clearing a non-empty deploy directory, the workflow requires a `.diverge-deploy` marker file in that directory. This prevents accidentally cleaning a shared web root.
