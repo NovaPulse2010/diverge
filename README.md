@@ -48,8 +48,8 @@ The deployment directory is configured separately as a repository variable becau
 
 Add this variable under `Settings -> Secrets and variables -> Actions -> Variables`:
 
-| Variable      | Default            | Description               |
-| ------------- | ------------------ | ------------------------- |
+| Variable      | Default            | Description                                                       |
+| ------------- | ------------------ | ----------------------------------------------------------------- |
 | `DEPLOY_PATH` | `/var/www/diverge` | Dedicated directory served by Nginx. It must end with `/diverge`. |
 
 The workflow runs on pushes to `main` or `master`. Push deployments use `DEPLOY_PATH`, or `/var/www/diverge` if the variable is not set. Manual deployments can override the directory from the Actions tab by filling `deploy_path`; leave it blank to use the repository variable. If `DEPLOY_PATH` was previously added as a secret, the workflow also supports that as a fallback.
