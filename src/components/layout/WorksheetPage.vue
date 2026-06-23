@@ -90,6 +90,5 @@ withDefaults(defineProps<{ showMeta?: boolean; title?: string }>(), {
     padding-bottom: 3mm;
     border-bottom: 1px solid #ddd;
   }
-
 }
 </style>

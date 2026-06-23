@@ -1,41 +1,41 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useWorksheet } from '@/composables/useWorksheet'
-import ControlPanel from '@/components/layout/ControlPanel.vue'
-import WorksheetPage from '@/components/layout/WorksheetPage.vue'
-import ChineseModule from '@/components/modules/ChineseModule.vue'
-import EnglishModule from '@/components/modules/EnglishModule.vue'
-import NumberModule from '@/components/modules/NumberModule.vue'
-import StrokeTraining from '@/components/modules/StrokeTraining.vue'
-import DictationMode from '@/components/modules/DictationMode.vue'
+import { computed } from "vue";
+import { useWorksheet } from "@/composables/useWorksheet";
+import ControlPanel from "@/components/layout/ControlPanel.vue";
+import WorksheetPage from "@/components/layout/WorksheetPage.vue";
+import ChineseModule from "@/components/modules/ChineseModule.vue";
+import EnglishModule from "@/components/modules/EnglishModule.vue";
+import NumberModule from "@/components/modules/NumberModule.vue";
+import StrokeTraining from "@/components/modules/StrokeTraining.vue";
+import DictationMode from "@/components/modules/DictationMode.vue";
 
-const { config, updateConfig, applyPreset, presets } = useWorksheet()
+const { config, updateConfig, applyPreset, presets } = useWorksheet();
 
 const worksheetTitle = computed(() => {
-  if (config.module === 'dictation') {
+  if (config.module === "dictation") {
     switch (config.dictationMode) {
-      case 'emoji-hint':
-        return '单词默写：看图写英文'
-      case 'chinese-hint':
-        return '默写练习：汉译英'
-      case 'char-only':
-        return '默写练习 · 看汉字写拼音'
+      case "emoji-hint":
+        return "单词默写：看图写英文";
+      case "chinese-hint":
+        return "默写练习：汉译英";
+      case "char-only":
+        return "默写练习 · 看汉字写拼音";
       default:
-        return '默写练习 · 看拼音写汉字'
+        return "默写练习 · 看拼音写汉字";
     }
   }
 
   switch (config.module) {
-    case 'english':
-      return '英文书写练习'
-    case 'number':
-      return '数字练习'
-    case 'stroke':
-      return '控笔训练'
+    case "english":
+      return "英文书写练习";
+    case "number":
+      return "数字练习";
+    case "stroke":
+      return "控笔训练";
     default:
-      return '汉字书写练习'
+      return "汉字书写练习";
   }
-})
+});
 </script>
 
 <template>
@@ -48,7 +48,13 @@ const worksheetTitle = computed(() => {
     />
     <main class="preview-area">
       <WorksheetPage
-        :show-meta="!(config.module === 'dictation' && (config.dictationMode === 'chinese-hint' || config.dictationMode === 'emoji-hint'))"
+        :show-meta="
+          !(
+            config.module === 'dictation' &&
+            (config.dictationMode === 'chinese-hint' ||
+              config.dictationMode === 'emoji-hint')
+          )
+        "
         :title="worksheetTitle"
       >
         <ChineseModule
@@ -101,9 +107,7 @@ const worksheetTitle = computed(() => {
           :grid-line-style="config.gridLineStyle"
           :show-correction="config.showCorrection"
         />
-        <div v-else class="empty-hint">
-          请在左侧面板选择练习类型并输入内容
-        </div>
+        <div v-else class="empty-hint">请在左侧面板选择练习类型并输入内容</div>
       </WorksheetPage>
     </main>
   </div>
