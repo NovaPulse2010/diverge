@@ -28,12 +28,20 @@
   .worksheet-page {
     box-shadow: none !important;
     margin: 0 !important;
-    width: 210mm !important;
-    min-height: 297mm !important;
+    width: auto !important;
+    min-height: auto !important;
     height: auto !important;
+    padding: 0 !important;
     overflow: visible !important;
     page-break-after: always;
     break-after: page;
+  }
+
+  .worksheet-page > .page-meta,
+  .dictation-title,
+  .dictation-info-bar,
+  .dictation-module > .section-title {
+    display: none !important;
   }
 
   .worksheet-content {
@@ -63,6 +71,13 @@
 
   @page {
     size: A4;
-    margin: 0;
+    margin: 28mm 10mm 14mm;
+
+    @bottom-center {
+      content: "第 " counter(page) " 页";
+      color: #666;
+      font-family: KaiTi, STKaiti, serif;
+      font-size: 10px;
+    }
   }
 }

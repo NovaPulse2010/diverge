@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useWorksheet } from '@/composables/useWorksheet'
 import ControlPanel from '@/components/layout/ControlPanel.vue'
 import WorksheetPage from '@/components/layout/WorksheetPage.vue'
@@ -9,6 +10,32 @@ import StrokeTraining from '@/components/modules/StrokeTraining.vue'
 import DictationMode from '@/components/modules/DictationMode.vue'
 
 const { config, updateConfig, applyPreset, presets } = useWorksheet()
+
+const worksheetTitle = computed(() => {
+  if (config.module === 'dictation') {
+    switch (config.dictationMode) {
+      case 'emoji-hint':
+        return '单词默写：看图写英文'
+      case 'chinese-hint':
+        return '默写练习：汉译英'
+      case 'char-only':
+        return '默写练习 · 看汉字写拼音'
+      default:
+        return '默写练习 · 看拼音写汉字'
+    }
+  }
+
+  switch (config.module) {
+    case 'english':
+      return '英文书写练习'
+    case 'number':
+      return '数字练习'
+    case 'stroke':
+      return '控笔训练'
+    default:
+      return '汉字书写练习'
+  }
+})
 </script>
 
 <template>
@@ -20,7 +47,10 @@ const { config, updateConfig, applyPreset, presets } = useWorksheet()
       @preset="applyPreset"
     />
     <main class="preview-area">
-      <WorksheetPage :show-meta="!(config.module === 'dictation' && (config.dictationMode === 'chinese-hint' || config.dictationMode === 'emoji-hint'))">
+      <WorksheetPage
+        :show-meta="!(config.module === 'dictation' && (config.dictationMode === 'chinese-hint' || config.dictationMode === 'emoji-hint'))"
+        :title="worksheetTitle"
+      >
         <ChineseModule
           v-if="config.module === 'chinese'"
           :content="config.content"
@@ -123,11 +153,6 @@ const { config, updateConfig, applyPreset, presets } = useWorksheet()
 </style>
 
 <style>
-@page {
-  size: A4;
-  margin: 0;
-}
-
 @media print {
   /* 隐藏控制面板，只打印字帖内容 */
   .panel {
