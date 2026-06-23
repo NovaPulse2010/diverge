@@ -10,7 +10,7 @@ on:
       deploy_path:
         description: Server directory to deploy dist files
         required: false
-        default: /var/www/diverge
+        type: string
 
 permissions:
   contents: read
@@ -29,7 +29,7 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
       SSH_USER: ${{ secrets.SSH_USER }}
-      DEPLOY_PATH: ${{ inputs.deploy_path || vars.DEPLOY_PATH || '/var/www/diverge' }}
+      DEPLOY_PATH: ${{ inputs.deploy_path || vars.DEPLOY_PATH || secrets.DEPLOY_PATH || '/var/www/diverge' }}
 
     steps:
       - name: Checkout
@@ -94,4 +94,16 @@ jobs:
           printf -v quoted_deploy_path '%q' "$DEPLOY_PATH"
           printf -v quoted_archive_path '%q' "/tmp/$ARCHIVE_NAME"
           ssh -i "$HOME/.ssh/deploy_key" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "set -e; mkdir -p $quoted_deploy_path; find $quoted_deploy_path -mindepth 1 -maxdepth 1 -exec rm -rf {} +; tar -xzf $quoted_archive_path -C $quoted_deploy_path; rm -f $quoted_archive_path"
+            "bash -se -- $quoted_deploy_path $quoted_archive_path" <<'DEPLOY_SCRIPT'
+          deploy_path=$1
+          archive_path=$2
+
+          echo "Deploying to $deploy_path"
+          mkdir -p "$deploy_path"
+          find "$deploy_path" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+          tar -xzf "$archive_path" -C "$deploy_path"
+          rm -f "$archive_path"
+          test -f "$deploy_path/index.html"
+          echo "Deployed files:"
+          find "$deploy_path" -maxdepth 2 -type f | sort | head -20
+          DEPLOY_SCRIPT
