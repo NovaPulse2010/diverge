@@ -28,8 +28,16 @@
   .worksheet-page {
     box-shadow: none !important;
     margin: 0 !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    height: auto !important;
+    overflow: visible !important;
     page-break-after: always;
     break-after: page;
+  }
+
+  .worksheet-content {
+    overflow: visible !important;
   }
 
   .worksheet-page:last-child {
@@ -41,6 +49,13 @@
     break-inside: avoid;
   }
 
+  .section-title,
+  .math-problem,
+  .line-wrap {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
   * {
     box-shadow: none !important;
     text-shadow: none !important;
@@ -48,6 +63,6 @@
 
   @page {
     size: A4;
-    margin: 10mm;
+    margin: 0;
   }
 }

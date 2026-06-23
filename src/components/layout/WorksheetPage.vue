@@ -8,9 +8,9 @@
 </template>
 
 <script setup lang="ts">
-import PageMeta from '@/components/common/PageMeta.vue'
+import PageMeta from "@/components/common/PageMeta.vue";
 
-withDefaults(defineProps<{ showMeta?: boolean }>(), { showMeta: true })
+withDefaults(defineProps<{ showMeta?: boolean }>(), { showMeta: true });
 </script>
 
 <style scoped>
@@ -37,9 +37,13 @@ withDefaults(defineProps<{ showMeta?: boolean }>(), { showMeta: true })
     box-shadow: none;
     margin: 0;
     padding: 10mm;
-    height: 297mm;
-    min-height: unset;
-    overflow: hidden;
+    min-height: 297mm;
+    height: auto;
+    overflow: visible;
+  }
+
+  .worksheet-content {
+    overflow: visible;
   }
 }
 </style>
