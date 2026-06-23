@@ -58,6 +58,17 @@ jobs:
               exit 1
             fi
           done
+          case "$DEPLOY_PATH" in
+            /*) ;;
+            *)
+              echo "DEPLOY_PATH must be an absolute path."
+              exit 1
+              ;;
+          esac
+          if [ "$DEPLOY_PATH" = "/" ]; then
+            echo "DEPLOY_PATH must not be /."
+            exit 1
+          fi
 
       - name: Configure SSH
         env:
@@ -68,13 +79,19 @@ jobs:
           chmod 600 "$HOME/.ssh/deploy_key"
           ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> "$HOME/.ssh/known_hosts"
 
-      - name: Prepare deploy directory
+      - name: Upload dist archive
+        env:
+          ARCHIVE_NAME: diverge-dist-${{ github.run_id }}.tar.gz
         run: |
-          ssh -i "$HOME/.ssh/deploy_key" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "mkdir -p '$DEPLOY_PATH'"
+          tar -C dist -czf "$ARCHIVE_NAME" .
+          scp -i "$HOME/.ssh/deploy_key" -P "$SSH_PORT" \
+            "$ARCHIVE_NAME" "$SSH_USER@$SSH_HOST:/tmp/$ARCHIVE_NAME"
 
-      - name: Sync dist to server
+      - name: Deploy dist archive
+        env:
+          ARCHIVE_NAME: diverge-dist-${{ github.run_id }}.tar.gz
         run: |
-          rsync -az --delete \
-            -e "ssh -i $HOME/.ssh/deploy_key -p $SSH_PORT" \
-            dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+          printf -v quoted_deploy_path '%q' "$DEPLOY_PATH"
+          printf -v quoted_archive_path '%q' "/tmp/$ARCHIVE_NAME"
+          ssh -i "$HOME/.ssh/deploy_key" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "set -e; mkdir -p $quoted_deploy_path; find $quoted_deploy_path -mindepth 1 -maxdepth 1 -exec rm -rf {} +; tar -xzf $quoted_archive_path -C $quoted_deploy_path; rm -f $quoted_archive_path"

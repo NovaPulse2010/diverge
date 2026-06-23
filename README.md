@@ -6,11 +6,11 @@ Learn more about the recommended Project Setup and IDE Support in the [Vue Docs 
 
 ## Deploy with GitHub Actions
 
-This project is a Vite static frontend. The GitHub Actions workflow in `.github/workflows/deploy.yml` builds the project and syncs the generated `dist/` directory to a server over SSH.
+This project is a Vite static frontend. The GitHub Actions workflow in `.github/workflows/deploy.yml` builds the project, uploads the generated `dist/` files as an archive, and extracts them on the server over SSH.
 
 ### Server prerequisites
 
-1. Install Nginx and rsync on the server.
+1. Install Nginx on the server.
 2. Create a deploy directory. The workflow defaults to `/var/www/diverge`.
 3. Make sure the SSH deploy user can write to that directory.
 4. Point Nginx to the deploy directory.
