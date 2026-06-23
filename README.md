@@ -35,12 +35,12 @@ server {
 
 Add these secrets in GitHub under `Settings -> Secrets and variables -> Actions`:
 
-| Secret            | Example            | Description                                      |
-| ----------------- | ------------------ | ------------------------------------------------ |
-| `SSH_HOST`        | `1.2.3.4`          | Server IP or domain                              |
-| `SSH_PORT`        | `22`               | SSH port                                         |
-| `SSH_USER`        | `deploy`           | SSH deploy user                                  |
-| `SSH_PRIVATE_KEY` | private key text   | Private key allowed to log in as the deploy user |
+| Secret            | Example          | Description                                      |
+| ----------------- | ---------------- | ------------------------------------------------ |
+| `SSH_HOST`        | `1.2.3.4`        | Server IP or domain                              |
+| `SSH_PORT`        | `22`             | SSH port                                         |
+| `SSH_USER`        | `deploy`         | SSH deploy user                                  |
+| `SSH_PRIVATE_KEY` | private key text | Private key allowed to log in as the deploy user |
 
 ### GitHub repository variables
 
