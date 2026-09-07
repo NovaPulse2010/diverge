@@ -81,11 +81,9 @@ withDefaults(
 
   .print-page-header {
     display: block;
-    position: fixed;
-    top: -22mm;
-    left: 0;
-    right: 0;
-    height: 18mm;
+    position: static;
+    height: auto;
+    margin-bottom: 6mm;
     color: #222;
     font-family: var(--font-kai);
   }
