@@ -3,10 +3,10 @@
     <div class="print-page-header" aria-hidden="true">
       <div class="print-page-title">{{ title }}</div>
       <div class="print-page-meta">
-        <span>姓名：__________</span>
-        <span>班级：__________</span>
-        <span>日期：__________</span>
-        <span>评分：__________</span>
+        <span>姓名：{{ studentName || "__________" }}</span>
+        <span>班级：{{ studentClass || "__________" }}</span>
+        <span>日期：{{ worksheetDate || "__________" }}</span>
+        <span>评分：{{ worksheetScore || "__________" }}</span>
       </div>
     </div>
     <PageMeta v-if="showMeta" />
@@ -19,10 +19,24 @@
 <script setup lang="ts">
 import PageMeta from "@/components/common/PageMeta.vue";
 
-withDefaults(defineProps<{ showMeta?: boolean; title?: string }>(), {
-  showMeta: true,
-  title: "练习字帖",
-});
+withDefaults(
+  defineProps<{
+    showMeta?: boolean;
+    title?: string;
+    studentName?: string;
+    studentClass?: string;
+    worksheetDate?: string;
+    worksheetScore?: string;
+  }>(),
+  {
+    showMeta: true,
+    title: "练习字帖",
+    studentName: "",
+    studentClass: "",
+    worksheetDate: "",
+    worksheetScore: "",
+  },
+);
 </script>
 
 <style scoped>
@@ -50,15 +64,18 @@ withDefaults(defineProps<{ showMeta?: boolean; title?: string }>(), {
 
 @media print {
   .worksheet-page {
+    display: block;
     box-shadow: none;
     margin: 0;
     padding: 0;
-    min-height: auto;
     height: auto;
+    min-height: unset;
     overflow: visible;
   }
 
   .worksheet-content {
+    display: block;
+    flex: none;
     overflow: visible;
   }
 
@@ -84,7 +101,7 @@ withDefaults(defineProps<{ showMeta?: boolean; title?: string }>(), {
   .print-page-meta {
     display: flex;
     justify-content: center;
-    gap: 14mm;
+    gap: 10mm;
     font-size: 12px;
     line-height: 1;
     padding-bottom: 3mm;

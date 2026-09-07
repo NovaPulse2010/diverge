@@ -3,17 +3,20 @@
 
     <!-- ① 汉译英默写 / 看图写英文 -->
     <template v-if="dictationMode === 'chinese-hint' || dictationMode === 'emoji-hint'">
-      <div
-        ref="titleEl"
-        class="dictation-title editable-field"
-        contenteditable="true"
-        :spellcheck="false"
-      />
-      <div class="dictation-info-bar">
-        <span>姓名：<span class="info-blank editable-field" contenteditable="true" :spellcheck="false"></span></span>
-        <span>班级：<span class="info-blank editable-field" contenteditable="true" :spellcheck="false"></span></span>
-        <span>日期：<span class="info-blank editable-field" contenteditable="true" :spellcheck="false"></span></span>
-        <span>评分：<span class="info-blank editable-field" contenteditable="true" :spellcheck="false"></span></span>
+      <div class="dictation-header">
+        <input
+          class="dictation-title editable-field"
+          type="text"
+          :value="title || defaultTitle"
+          aria-label="默写标题"
+          @input="updateHeader('dictationTitle', $event)"
+        />
+        <div class="dictation-info-bar">
+          <label>姓名：<input class="info-blank editable-field" type="text" :value="studentName" aria-label="姓名" @input="updateHeader('studentName', $event)" /></label>
+          <label>班级：<input class="info-blank editable-field" type="text" :value="studentClass" aria-label="班级" @input="updateHeader('studentClass', $event)" /></label>
+          <label>日期：<input class="info-blank date-blank editable-field" type="text" :value="worksheetDate" aria-label="日期" @input="updateHeader('worksheetDate', $event)" /></label>
+          <label>评分：<input class="info-blank editable-field" type="text" :value="worksheetScore" aria-label="评分" @input="updateHeader('worksheetScore', $event)" /></label>
+        </div>
       </div>
 
       <!-- 每个行组：提示行 + N 行四线三格 -->
@@ -113,8 +116,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue'
-import type { GridType, DictationSubMode } from '@/types/worksheet'
+import { computed } from 'vue'
+import type { GridType, DictationSubMode, WorksheetConfig } from '@/types/worksheet'
 import { usePinyin } from '@/composables/usePinyin'
 import TianziGrid from '@/components/grids/TianziGrid.vue'
 import MiziGrid from '@/components/grids/MiziGrid.vue'
@@ -137,6 +140,11 @@ const props = withDefaults(
     gridBaseColor?: string
     gridLineStyle?: 'dashed' | 'solid'
     showCorrection?: boolean
+    title?: string
+    studentName?: string
+    studentClass?: string
+    worksheetDate?: string
+    worksheetScore?: string
   }>(),
   {
     dictationMode: 'pinyin-only',
@@ -152,19 +160,25 @@ const props = withDefaults(
     gridBaseColor: '#e87060',
     gridLineStyle: 'dashed',
     showCorrection: false,
+    title: '',
+    studentName: '',
+    studentClass: '',
+    worksheetDate: '',
+    worksheetScore: '',
   },
 )
 
-const titleEl = ref<HTMLElement | null>(null)
 const defaultTitle = computed(() =>
   props.dictationMode === 'emoji-hint' ? '单词默写：看图写英文' : '默写练习：汉译英'
 )
-onMounted(() => {
-  if (titleEl.value) titleEl.value.innerText = defaultTitle.value
-})
-watch(defaultTitle, (val) => {
-  if (titleEl.value) titleEl.value.innerText = val
-})
+
+const emit = defineEmits<{
+  updateHeader: [partial: Partial<WorksheetConfig>]
+}>()
+
+function updateHeader(field: 'dictationTitle' | 'studentName' | 'studentClass' | 'worksheetDate' | 'worksheetScore', event: Event) {
+  emit('updateHeader', { [field]: (event.target as HTMLInputElement).value })
+}
 
 // 提示文字内联样式
 const hintCellStyle = computed(() => ({
@@ -256,7 +270,16 @@ const charRows = computed(() => {
 }
 
 /* 标题 & 信息栏 */
+.dictation-header {
+  flex-shrink: 0;
+}
+
 .dictation-title {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-family: var(--font-kai);
   font-size: 20px;
   font-weight: 600;
@@ -294,12 +317,27 @@ const charRows = computed(() => {
   padding-bottom: 8px;
 }
 
+.dictation-info-bar label {
+  display: inline-flex;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
 .info-blank {
-  display: inline-block;
   width: 80px;
+  padding: 0 2px 1px;
+  border: 0;
   border-bottom: 1px solid #555;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   vertical-align: bottom;
   margin-left: 2px;
+}
+
+.date-blank {
+  width: 88px;
 }
 
 .correction-zone {
@@ -336,8 +374,38 @@ const charRows = computed(() => {
 }
 
 @media print {
+  .dictation-module {
+    display: block;
+    flex: none;
+  }
+
+  .dictation-header,
+  .hint-group,
+  .correction-header,
+  .correction-grid-row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .dictation-header {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .correction-header {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .correction-zone,
   .correction-fill {
+    display: block;
+    flex: none;
     overflow: visible;
+  }
+
+  .correction-grid-row {
+    margin-bottom: 20px;
   }
 }
 

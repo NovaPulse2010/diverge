@@ -45,6 +45,8 @@
   }
 
   .worksheet-content {
+    display: block !important;
+    flex: none !important;
     overflow: visible !important;
   }
 

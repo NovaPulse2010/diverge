@@ -8,6 +8,14 @@ export type DictationSubMode = 'pinyin-only' | 'char-only' | 'chinese-hint' | 'e
 export type StrokePattern = 'straight' | 'wave' | 'zigzag' | 'curve' | 'spiral' | 'circle'
 export type StrokeDifficulty = 'easy' | 'medium' | 'hard'
 
+function getCurrentDate(): string {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export interface WorksheetConfig {
   subject: Subject
   module: ModuleType
@@ -44,6 +52,16 @@ export interface WorksheetConfig {
   gridColor: string
   /** 英文默写是否显示订正区 */
   showCorrection: boolean
+  /** 英文默写抬头 */
+  dictationTitle: string
+  /** 学生姓名 */
+  studentName: string
+  /** 班级 */
+  studentClass: string
+  /** 字帖日期 */
+  worksheetDate: string
+  /** 评分 */
+  worksheetScore: string
   /** 中文提示字号(px) */
   hintFontSize: number
   /** 中文提示颜色 */
@@ -84,6 +102,11 @@ export const defaultConfig: WorksheetConfig = {
   englishRowCols: [4],
   gridColor: '#dc3545',
   showCorrection: false,
+  dictationTitle: '',
+  studentName: '',
+  studentClass: '',
+  worksheetDate: getCurrentDate(),
+  worksheetScore: '',
   hintFontSize: 14,
   hintColor: '#2c3040',
   hintBold: false,

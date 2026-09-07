@@ -17,7 +17,7 @@ const worksheetTitle = computed(() => {
       case "emoji-hint":
         return "单词默写：看图写英文";
       case "chinese-hint":
-        return "默写练习：汉译英";
+        return config.dictationTitle || "默写练习：汉译英";
       case "char-only":
         return "默写练习 · 看汉字写拼音";
       default:
@@ -56,6 +56,10 @@ const worksheetTitle = computed(() => {
           )
         "
         :title="worksheetTitle"
+        :student-name="config.studentName"
+        :student-class="config.studentClass"
+        :worksheet-date="config.worksheetDate"
+        :worksheet-score="config.worksheetScore"
       >
         <ChineseModule
           v-if="config.module === 'chinese'"
@@ -106,6 +110,12 @@ const worksheetTitle = computed(() => {
           :grid-base-color="config.gridBaseColor"
           :grid-line-style="config.gridLineStyle"
           :show-correction="config.showCorrection"
+          :title="config.dictationTitle"
+          :student-name="config.studentName"
+          :student-class="config.studentClass"
+          :worksheet-date="config.worksheetDate"
+          :worksheet-score="config.worksheetScore"
+          @update-header="updateConfig"
         />
         <div v-else class="empty-hint">请在左侧面板选择练习类型并输入内容</div>
       </WorksheetPage>
