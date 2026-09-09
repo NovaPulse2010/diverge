@@ -84,7 +84,8 @@
             :guide-color="guideColorComputed"
           >
             <div class="dictation-cell pinyin-mode">
-              <span class="hint-pinyin">{{ cell.pinyin }}</span>
+              <span v-if="dictationDisplayMode !== 'hanzi'" class="hint-pinyin">{{ cell.pinyin }}</span>
+              <span v-if="dictationDisplayMode !== 'pinyin'" class="hint-char">{{ cell.char }}</span>
             </div>
           </component>
         </div>
@@ -105,7 +106,8 @@
             :guide-color="guideColorComputed"
           >
             <div class="dictation-cell char-mode">
-              <span v-if="cell.showChar" class="hint-char">{{ cell.char }}</span>
+              <span v-if="cell.showChar && dictationDisplayMode !== 'pinyin'" class="hint-char">{{ cell.char }}</span>
+              <span v-if="dictationDisplayMode !== 'hanzi'" class="hint-pinyin">{{ cell.pinyin }}</span>
             </div>
           </component>
         </div>
@@ -117,7 +119,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { GridType, DictationSubMode, WorksheetConfig } from '@/types/worksheet'
+import type { GridType, DictationSubMode, DictationDisplayMode, WorksheetConfig } from '@/types/worksheet'
 import { usePinyin } from '@/composables/usePinyin'
 import TianziGrid from '@/components/grids/TianziGrid.vue'
 import MiziGrid from '@/components/grids/MiziGrid.vue'
@@ -128,6 +130,7 @@ const props = withDefaults(
   defineProps<{
     content: string
     dictationMode?: DictationSubMode
+    dictationDisplayMode?: DictationDisplayMode
     rowCols?: number[]
     gridType?: GridType
     gridColor?: string
@@ -148,6 +151,7 @@ const props = withDefaults(
   }>(),
   {
     dictationMode: 'pinyin-only',
+    dictationDisplayMode: 'pinyin',
     rowCols: () => [4],
     gridType: 'tianzi',
     gridColor: '#dc3545',
@@ -236,10 +240,10 @@ const gridComponent = computed(() => {
 const pinyinRows = computed(() => {
   const chars = props.content.replace(/\s+/g, '').split('')
   const colsPerRow = 10
-  const rows: Array<Array<{ pinyin: string }>> = []
-  let currentRow: Array<{ pinyin: string }> = []
+  const rows: Array<Array<{ char: string; pinyin: string }>> = []
+  let currentRow: Array<{ char: string; pinyin: string }> = []
   for (const ch of chars) {
-    currentRow.push({ pinyin: getCharPinyin(ch) || ch })
+    currentRow.push({ char: ch, pinyin: getCharPinyin(ch) || ch })
     if (currentRow.length >= colsPerRow) { rows.push(currentRow); currentRow = [] }
   }
   if (currentRow.length) rows.push(currentRow)
@@ -249,12 +253,12 @@ const pinyinRows = computed(() => {
 // 看汉字写拼音
 const charRows = computed(() => {
   const chars = props.content.replace(/\s+/g, '').split('')
-  const rows: Array<Array<{ char: string; showChar: boolean }>> = []
+  const rows: Array<Array<{ char: string; pinyin: string; showChar: boolean }>> = []
   const colsPerRow = 10
-  let currentRow: Array<{ char: string; showChar: boolean }> = []
+  let currentRow: Array<{ char: string; pinyin: string; showChar: boolean }> = []
   for (const ch of chars) {
-    currentRow.push({ char: ch, showChar: true })
-    currentRow.push({ char: '', showChar: false })
+    currentRow.push({ char: ch, pinyin: getCharPinyin(ch) || ch, showChar: true })
+    currentRow.push({ char: '', pinyin: getCharPinyin(ch) || ch, showChar: false })
     if (currentRow.length >= colsPerRow) { rows.push(currentRow); currentRow = [] }
   }
   if (currentRow.length) rows.push(currentRow)
@@ -559,5 +563,17 @@ const charRows = computed(() => {
   font-family: var(--font-kai);
   font-size: 28px;
   color: #bbb;
+}
+
+.pinyin-mode .hint-char {
+  position: absolute;
+  bottom: 3px;
+  color: #bbb;
+  font-size: 24px;
+}
+
+.char-mode .hint-pinyin {
+  top: 3px;
+  font-size: 12px;
 }
 </style>

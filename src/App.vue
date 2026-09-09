@@ -98,6 +98,7 @@ const worksheetTitle = computed(() => {
           v-else-if="config.module === 'dictation'"
           :content="config.content"
           :dictation-mode="config.dictationMode"
+          :dictation-display-mode="config.dictationDisplayMode"
           :row-cols="config.englishRowCols"
           :grid-type="config.gridType"
           :grid-color="config.gridColor"

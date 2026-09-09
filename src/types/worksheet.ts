@@ -5,6 +5,7 @@ export type CharColor = 'lightgray' | 'black' | 'blue' | 'red'
 export type ModuleType = 'chinese' | 'english' | 'number' | 'stroke' | 'dictation'
 export type EnglishFont = 'Caveat' | 'Dancing Script'
 export type DictationSubMode = 'pinyin-only' | 'char-only' | 'chinese-hint' | 'emoji-hint'
+export type DictationDisplayMode = 'pinyin' | 'hanzi' | 'both'
 export type StrokePattern = 'straight' | 'wave' | 'zigzag' | 'curve' | 'spiral' | 'circle'
 export type StrokeDifficulty = 'easy' | 'medium' | 'hard'
 
@@ -42,6 +43,8 @@ export interface WorksheetConfig {
   strokeDifficulty: StrokeDifficulty
   /** 默写子模式 */
   dictationMode: DictationSubMode
+  /** 语文默写提示显示方式 */
+  dictationDisplayMode: DictationDisplayMode
   /** 默写内容类型：可多选，'words' | 'sentences' */
   dictationContentType: string[]
   /** 英文默写书写横线数 */
@@ -97,6 +100,7 @@ export const defaultConfig: WorksheetConfig = {
   strokePatterns: ['straight', 'wave', 'zigzag'],
   strokeDifficulty: 'easy',
   dictationMode: 'pinyin-only',
+  dictationDisplayMode: 'pinyin',
   dictationContentType: ['words'],
   writingLineCount: 3,
   englishRowCols: [4],

@@ -16,9 +16,13 @@ export function usePinyin() {
       }))
   }
 
+  function getTextPinyin(text: string): string {
+    return getTextPinyinPairs(text).map(item => item.pinyin).join(' ')
+  }
+
   function isChinese(char: string): boolean {
     return /[\u4e00-\u9fff]/.test(char)
   }
 
-  return { getCharPinyin, getTextPinyinPairs, isChinese }
+  return { getCharPinyin, getTextPinyinPairs, getTextPinyin, isChinese }
 }

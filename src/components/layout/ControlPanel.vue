@@ -218,6 +218,26 @@
       <template
         v-else-if="config.module === 'dictation' && config.subject === 'yuwen'"
       >
+        <div class="panel-block dictation-tool-block">
+          <div class="block-title">汉字转拼音</div>
+          <div class="tool-hint">输入汉字后自动生成带声调拼音，多音字可直接校正。</div>
+          <textarea
+            class="content-ta tool-input"
+            :value="config.content"
+            placeholder="如：爸爸 皮球 古诗"
+            rows="2"
+            @input="updateConfig({ content: ($event.target as HTMLTextAreaElement).value })"
+          />
+          <div class="tool-result">
+            <span>转换结果</span>
+            <strong>{{ convertedPinyin || '输入汉字后显示拼音' }}</strong>
+          </div>
+          <div class="tool-actions">
+            <button class="tool-action primary" type="button" @click="updateConfig({ dictationDisplayMode: 'pinyin' })">只显示拼音</button>
+            <button class="tool-action" type="button" @click="updateConfig({ dictationDisplayMode: 'hanzi' })">只显示汉字</button>
+            <button class="tool-action" type="button" @click="updateConfig({ dictationDisplayMode: 'both' })">两者都显示</button>
+          </div>
+        </div>
         <div class="panel-block">
           <div class="block-title">默写模式</div>
           <div class="chips wrap">
@@ -754,6 +774,7 @@ import type {
   DictationSubMode,
 } from "@/types/worksheet";
 import { usePrint } from "@/composables/usePrint";
+import { usePinyin } from "@/composables/usePinyin";
 
 const props = defineProps<{
   config: WorksheetConfig;
@@ -766,6 +787,11 @@ const emit = defineEmits<{
 }>();
 
 const { printWorksheet } = usePrint();
+const { getTextPinyinPairs } = usePinyin();
+
+const convertedPinyin = computed(() =>
+  getTextPinyinPairs(props.config.content).map(item => item.pinyin).join(' '),
+);
 
 function updateConfig(partial: Partial<WorksheetConfig>) {
   emit("update", partial);
@@ -959,6 +985,63 @@ function toggleStrokePattern(pattern: StrokePattern) {
   border-right: 1px solid #eaeef3;
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
+}
+
+.dictation-tool-block {
+  padding: 10px;
+  border: 1px solid #dce4ea;
+  border-radius: 10px;
+  background: #f8fbfd;
+}
+
+.tool-hint {
+  margin: -2px 0 8px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.tool-input {
+  min-height: 58px;
+  resize: vertical;
+}
+
+.tool-result {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.tool-result strong {
+  color: var(--t-color);
+  font-size: 12px;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.tool-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.tool-action {
+  padding: 7px 3px;
+  border: 1px solid var(--t-color);
+  border-radius: 7px;
+  color: var(--t-color);
+  background: #fff;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.tool-action.primary {
+  color: #fff;
+  background: var(--t-color);
 }
 
 /* ── Brand ── */
