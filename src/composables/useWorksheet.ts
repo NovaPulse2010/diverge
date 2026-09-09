@@ -1,17 +1,36 @@
 import { reactive, watch } from 'vue'
 import { defaultConfig, type WorksheetConfig, type PresetTemplate, type Subject } from '@/types/worksheet'
 
-const STORAGE_KEY = 'worksheet-config-v2'
-const LEGACY_STORAGE_KEY = 'worksheet-config-v1'
+const SUBJECT_STORAGE_KEYS: Record<Subject, string> = {
+  yuwen: 'worksheet-config-yuwen-v1',
+  shuxue: 'worksheet-config-shuxue-v1',
+  yingyu: 'worksheet-config-yingyu-v1',
+}
+const LEGACY_STORAGE_KEYS = ['worksheet-config-v2', 'worksheet-config-v1']
+const ACTIVE_SUBJECT_KEY = 'worksheet-active-subject-v1'
 
-function loadSaved(): Partial<WorksheetConfig> {
+function readJson(key: string): Partial<WorksheetConfig> | null {
   try {
-    const currentRaw = localStorage.getItem(STORAGE_KEY)
-    const legacyRaw = currentRaw ? null : localStorage.getItem(LEGACY_STORAGE_KEY)
-    const raw = currentRaw || legacyRaw
-    if (!raw) return {}
-    const saved = JSON.parse(raw) as Partial<WorksheetConfig>
-    const migratedLegacyDictation = !currentRaw && saved.module === 'dictation' && saved.subject === 'yuwen'
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) as Partial<WorksheetConfig> : null
+  } catch {
+    return null
+  }
+}
+
+function readLegacy(): Partial<WorksheetConfig> | null {
+  for (const key of LEGACY_STORAGE_KEYS) {
+    const saved = readJson(key)
+    if (saved) return saved
+  }
+  return null
+}
+
+function loadSavedForSubject(subject: Subject): Partial<WorksheetConfig> {
+  const current = readJson(SUBJECT_STORAGE_KEYS[subject])
+  const saved = current || (readLegacy()?.subject === subject ? readLegacy() : null)
+  if (!saved) return {}
+  const migratedLegacyDictation = !current && saved.module === 'dictation' && saved.subject === 'yuwen'
     return {
       ...saved,
       ...(migratedLegacyDictation
@@ -26,18 +45,43 @@ function loadSaved(): Partial<WorksheetConfig> {
       // 日期始终按当天生成，避免长期缓存旧日期。
       worksheetDate: defaultConfig.worksheetDate,
     }
-  } catch {
-    return {}
-  }
 }
 
-const config = reactive<WorksheetConfig>({ ...defaultConfig, ...loadSaved() })
+function activeSubject(): Subject {
+  const stored = localStorage.getItem(ACTIVE_SUBJECT_KEY)
+  if (stored === 'yuwen' || stored === 'shuxue' || stored === 'yingyu') return stored
+  const legacy = readLegacy()?.subject
+  if (legacy === 'yuwen' || legacy === 'shuxue' || legacy === 'yingyu') return legacy
+  return defaultConfig.subject
+}
+
+function defaultModuleFor(subject: Subject): WorksheetConfig['module'] {
+  if (subject === 'shuxue') return 'number'
+  if (subject === 'yingyu') return 'english'
+  return 'chinese'
+}
+
+const initialSubject = activeSubject()
+const config = reactive<WorksheetConfig>({
+  ...defaultConfig,
+  subject: initialSubject,
+  module: defaultModuleFor(initialSubject),
+  ...loadSavedForSubject(initialSubject),
+  worksheetDate: defaultConfig.worksheetDate,
+})
+
+function saveSubjectConfig(subject: Subject, value: WorksheetConfig = config) {
+  try {
+    localStorage.setItem(SUBJECT_STORAGE_KEYS[subject], JSON.stringify(value))
+    localStorage.setItem(ACTIVE_SUBJECT_KEY, subject)
+  } catch { /* storage unavailable */ }
+}
 
 // Auto-save on every change (shallow fields + deep arrays)
 watch(
   config,
   (val) => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(val)) } catch { /* quota */ }
+    saveSubjectConfig(val.subject, val)
   },
   { deep: true },
 )
@@ -115,25 +159,35 @@ export function useWorksheet() {
   function updateConfig(partial: Partial<WorksheetConfig>) {
     // Auto-switch module & dictation mode when subject changes
     if (partial.subject !== undefined && partial.subject !== config.subject) {
+      const previousSubject = config.subject
+      saveSubjectConfig(previousSubject)
       const s = partial.subject as Subject
-      if (s === 'yuwen' && partial.module === undefined) {
-        partial.module = 'chinese'
-        if (config.dictationMode === 'chinese-hint' || config.dictationMode === 'emoji-hint') {
-          partial.dictationMode = 'pinyin-only'
-        }
-      } else if (s === 'shuxue') {
-        partial.module = 'number'
-      } else if (s === 'yingyu' && partial.module === undefined) {
-        partial.module = 'english'
-        if (config.dictationMode === 'pinyin-only' || config.dictationMode === 'char-only') {
-          partial.dictationMode = 'chinese-hint'
-        }
+      const savedTarget = loadSavedForSubject(s)
+      const next: WorksheetConfig = {
+        ...defaultConfig,
+        module: defaultModuleFor(s),
+        ...savedTarget,
+        ...partial,
+        subject: s,
       }
+      if (partial.module === undefined && savedTarget.module === undefined) {
+        next.module = defaultModuleFor(s)
+      }
+      if (s === 'yuwen' && partial.module === undefined && savedTarget.module === undefined) {
+        next.dictationMode = 'pinyin-only'
+        next.dictationDisplayMode = 'pinyin'
+      }
+      if (s === 'yingyu' && partial.module === undefined && savedTarget.module === undefined) {
+        next.dictationMode = 'chinese-hint'
+      }
+      Object.assign(config, next)
+      return
     }
     Object.assign(config, partial)
   }
 
   function applyPreset(preset: PresetTemplate) {
+    saveSubjectConfig(config.subject)
     Object.assign(config, defaultConfig, preset.config)
   }
 
