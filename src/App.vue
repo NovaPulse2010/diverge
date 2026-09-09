@@ -51,7 +51,8 @@ const worksheetTitle = computed(() => {
         :show-meta="
           !(
             config.module === 'dictation' &&
-            (config.dictationMode === 'chinese-hint' ||
+            (config.subject === 'yuwen' ||
+              config.dictationMode === 'chinese-hint' ||
               config.dictationMode === 'emoji-hint')
           )
         "

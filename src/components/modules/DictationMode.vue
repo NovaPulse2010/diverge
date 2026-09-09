@@ -72,29 +72,44 @@
 
     <!-- ② 语文拼音默写：每个字上方四线三格，下方田字格 -->
     <template v-else-if="dictationMode === 'pinyin-only' || dictationMode === 'char-only'">
-      <div class="section-title">默写练习 · {{ dictationMode === 'pinyin-only' ? '看拼音写汉字' : '看汉字写拼音' }}</div>
-      <div v-for="(row, ri) in dictationRows" :key="ri" class="dictation-practice-row">
-        <div v-for="(cell, ci) in row" :key="ci" class="dictation-unit">
-          <EnglishGrid
-            class="dictation-pinyin-grid"
-            :scale="0.72"
-            :top-color="gridTopColor"
-            :mid-color="gridMidColor"
-            :base-color="gridBaseColor"
-            :line-style="gridLineStyle"
-          >
-            <span v-if="dictationDisplayMode !== 'hanzi'" class="hint-pinyin">{{ cell.pinyin }}</span>
-          </EnglishGrid>
-          <component
-            :is="gridComponent"
-            :size="52"
-            :border-color="gridColor"
-            :guide-color="guideColorComputed"
-          >
-            <span v-if="dictationDisplayMode !== 'pinyin' && cell.showChar" class="hint-char">{{ cell.char }}</span>
-          </component>
+      <div class="chinese-dictation-header">
+        <div class="chinese-dictation-title">语文默写 · {{ dictationMode === 'pinyin-only' ? '看拼音写汉字' : '看汉字写拼音' }}</div>
+        <div class="chinese-dictation-meta">
+          <span>姓名：<b>{{ studentName || '__________' }}</b></span>
+          <span>班级：<b>{{ studentClass || '__________' }}</b></span>
+          <span>日期：<b>{{ worksheetDate || '__________' }}</b></span>
+          <span>评分：<b>{{ worksheetScore || '__________' }}</b></span>
         </div>
       </div>
+      <div class="chinese-dictation-guide">
+        <span>每行固定 8 格 · 拼音在上，汉字在下</span>
+        <span>按词语分组，超过 8 格自动换行</span>
+      </div>
+      <div class="chinese-dictation-grid">
+        <div v-for="(row, ri) in dictationRows" :key="ri" class="dictation-practice-row">
+          <div v-for="(cell, ci) in row" :key="ci" class="dictation-unit">
+            <EnglishGrid
+              class="dictation-pinyin-grid"
+              :scale="0.72"
+              :top-color="gridTopColor"
+              :mid-color="gridMidColor"
+              :base-color="gridBaseColor"
+              :line-style="gridLineStyle"
+            >
+              <span v-if="dictationDisplayMode !== 'hanzi'" class="hint-pinyin">{{ cell.pinyin }}</span>
+            </EnglishGrid>
+            <component
+              :is="gridComponent"
+              :size="52"
+              :border-color="gridColor"
+              :guide-color="guideColorComputed"
+            >
+              <span v-if="dictationDisplayMode !== 'pinyin' && cell.showChar" class="hint-char">{{ cell.char }}</span>
+            </component>
+          </div>
+        </div>
+      </div>
+      <div class="chinese-dictation-footer"><span>每个字上方写拼音，下方写汉字</span><span>第 1 页</span></div>
     </template>
 
   </div>
@@ -243,6 +258,56 @@ const dictationRows = computed(() => {
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+.chinese-dictation-header {
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+.chinese-dictation-title {
+  margin-bottom: 8px;
+  text-align: center;
+  color: var(--text-primary);
+  font-family: var(--font-kai);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.chinese-dictation-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 13px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dce3df;
+  color: var(--text-primary);
+  font: 12px/1.2 var(--font-kai);
+}
+
+.chinese-dictation-meta b {
+  display: inline-block;
+  min-width: 56px;
+  padding: 0 3px 2px;
+  border-bottom: 1px solid #69716e;
+  font-weight: 400;
+}
+
+.chinese-dictation-guide {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 7px;
+  padding: 8px 14px;
+  border: 1px solid #cad7d0;
+  border-radius: 6px 6px 0 0;
+  color: #267a56;
+  background: #f2faf5;
+  font: 700 12px/1 var(--font-kai);
+}
+
+.chinese-dictation-grid {
+  border-top: 1px solid #dce3df;
+  border-left: 1px solid #dce3df;
 }
 
 /* 标题 & 信息栏 */
@@ -516,6 +581,7 @@ const dictationRows = computed(() => {
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 5px;
   padding: 7px 0 9px;
+  border-right: 1px solid #dce3df;
   border-bottom: 1px solid #dce3df;
   page-break-inside: avoid;
 }
@@ -547,6 +613,22 @@ const dictationRows = computed(() => {
 .dictation-unit > .square-cell {
   flex-shrink: 0;
   margin-top: 4px;
+}
+
+.dictation-unit > :deep(.tianzi-cell),
+.dictation-unit > :deep(.mizi-cell),
+.dictation-unit > :deep(.square-cell) {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+}
+
+.chinese-dictation-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  color: #8b9390;
+  font: 10px/1 var(--font-kai);
 }
 
 .dictation-cell {
