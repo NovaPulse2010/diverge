@@ -1052,6 +1052,11 @@ function toggleStrokePattern(pattern: StrokePattern) {
   background: var(--t-color);
 }
 
+.tool-action.active {
+  color: #fff;
+  background: var(--t-color);
+}
+
 /* ── Brand ── */
 .panel-brand {
   display: flex;
