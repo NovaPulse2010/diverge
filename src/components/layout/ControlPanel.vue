@@ -233,9 +233,9 @@
             <strong>{{ convertedPinyin || '输入汉字后显示拼音' }}</strong>
           </div>
           <div class="tool-actions">
-            <button class="tool-action primary" type="button" @click="updateConfig({ dictationDisplayMode: 'pinyin' })">只显示拼音</button>
-            <button class="tool-action" type="button" @click="updateConfig({ dictationDisplayMode: 'hanzi' })">只显示汉字</button>
-            <button class="tool-action" type="button" @click="updateConfig({ dictationDisplayMode: 'both' })">两者都显示</button>
+            <button class="tool-action" :class="{ active: config.dictationDisplayMode === 'pinyin' }" type="button" @click="updateConfig({ dictationDisplayMode: 'pinyin' })">只显示拼音</button>
+            <button class="tool-action" :class="{ active: config.dictationDisplayMode === 'hanzi' }" type="button" @click="updateConfig({ dictationDisplayMode: 'hanzi' })">只显示汉字</button>
+            <button class="tool-action" :class="{ active: config.dictationDisplayMode === 'both' }" type="button" @click="updateConfig({ dictationDisplayMode: 'both' })">两者都显示</button>
           </div>
         </div>
         <div class="panel-block">
@@ -246,7 +246,7 @@
               :key="dm.value"
               class="chip"
               :class="{ active: config.dictationMode === dm.value }"
-              @click="updateConfig({ dictationMode: dm.value })"
+              @click="setYuwenDictationMode(dm.value)"
             >
               {{ dm.label }}
             </button>
@@ -871,9 +871,17 @@ function selectModule(m: ModuleItem) {
   updateConfig(partial);
 }
 
+function setYuwenDictationMode(mode: 'pinyin-only' | 'char-only') {
+  updateConfig({
+    dictationMode: mode,
+    dictationDisplayMode: mode === 'char-only' ? 'hanzi' : 'pinyin',
+  })
+}
+
 // ── Content input ──
 const showContentInput = computed(() =>
-  ["chinese", "english", "dictation"].includes(props.config.module),
+  ["chinese", "english"].includes(props.config.module) ||
+  (props.config.module === "dictation" && props.config.subject !== "yuwen"),
 );
 
 const contentLabel = computed(() => {

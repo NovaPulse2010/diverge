@@ -70,45 +70,28 @@
       </div>
     </template>
 
-    <!-- ② 看拼音写汉字 -->
-    <template v-else-if="dictationMode === 'pinyin-only'">
-      <div class="section-title">默写练习 · 看拼音写汉字</div>
-      <div v-for="(row, ri) in pinyinRows" :key="ri" class="practice-row">
-        <div class="grid-row">
+    <!-- ② 语文拼音默写：每个字上方四线三格，下方田字格 -->
+    <template v-else-if="dictationMode === 'pinyin-only' || dictationMode === 'char-only'">
+      <div class="section-title">默写练习 · {{ dictationMode === 'pinyin-only' ? '看拼音写汉字' : '看汉字写拼音' }}</div>
+      <div v-for="(row, ri) in dictationRows" :key="ri" class="dictation-practice-row">
+        <div v-for="(cell, ci) in row" :key="ci" class="dictation-unit">
+          <EnglishGrid
+            class="dictation-pinyin-grid"
+            :scale="0.72"
+            :top-color="gridTopColor"
+            :mid-color="gridMidColor"
+            :base-color="gridBaseColor"
+            :line-style="gridLineStyle"
+          >
+            <span v-if="dictationDisplayMode !== 'hanzi'" class="hint-pinyin">{{ cell.pinyin }}</span>
+          </EnglishGrid>
           <component
-            v-for="(cell, ci) in row"
-            :key="ci"
             :is="gridComponent"
             :size="52"
             :border-color="gridColor"
             :guide-color="guideColorComputed"
           >
-            <div class="dictation-cell pinyin-mode">
-              <span v-if="dictationDisplayMode !== 'hanzi'" class="hint-pinyin">{{ cell.pinyin }}</span>
-              <span v-if="dictationDisplayMode !== 'pinyin'" class="hint-char">{{ cell.char }}</span>
-            </div>
-          </component>
-        </div>
-      </div>
-    </template>
-
-    <!-- ③ 看汉字写拼音 -->
-    <template v-else-if="dictationMode === 'char-only'">
-      <div class="section-title">默写练习 · 看汉字写拼音</div>
-      <div v-for="(row, ri) in charRows" :key="ri" class="practice-row">
-        <div class="grid-row">
-          <component
-            v-for="(cell, ci) in row"
-            :key="ci"
-            :is="gridComponent"
-            :size="52"
-            :border-color="gridColor"
-            :guide-color="guideColorComputed"
-          >
-            <div class="dictation-cell char-mode">
-              <span v-if="cell.showChar && dictationDisplayMode !== 'pinyin'" class="hint-char">{{ cell.char }}</span>
-              <span v-if="dictationDisplayMode !== 'hanzi'" class="hint-pinyin">{{ cell.pinyin }}</span>
-            </div>
+            <span v-if="dictationDisplayMode !== 'pinyin' && cell.showChar" class="hint-char">{{ cell.char }}</span>
           </component>
         </div>
       </div>
@@ -236,29 +219,18 @@ const gridComponent = computed(() => {
   }
 })
 
-// 看拼音写汉字
-const pinyinRows = computed(() => {
+// 语文默写固定 A4 每行 8 格：上方四线三格，下方田字格。
+const dictationRows = computed(() => {
   const chars = props.content.replace(/\s+/g, '').split('')
-  const colsPerRow = 10
-  const rows: Array<Array<{ char: string; pinyin: string }>> = []
-  let currentRow: Array<{ char: string; pinyin: string }> = []
-  for (const ch of chars) {
-    currentRow.push({ char: ch, pinyin: getCharPinyin(ch) || ch })
-    if (currentRow.length >= colsPerRow) { rows.push(currentRow); currentRow = [] }
-  }
-  if (currentRow.length) rows.push(currentRow)
-  return rows
-})
-
-// 看汉字写拼音
-const charRows = computed(() => {
-  const chars = props.content.replace(/\s+/g, '').split('')
+  const colsPerRow = 8
   const rows: Array<Array<{ char: string; pinyin: string; showChar: boolean }>> = []
-  const colsPerRow = 10
   let currentRow: Array<{ char: string; pinyin: string; showChar: boolean }> = []
   for (const ch of chars) {
-    currentRow.push({ char: ch, pinyin: getCharPinyin(ch) || ch, showChar: true })
-    currentRow.push({ char: '', pinyin: getCharPinyin(ch) || ch, showChar: false })
+    currentRow.push({
+      char: ch,
+      pinyin: getCharPinyin(ch) || ch,
+      showChar: props.dictationMode === 'char-only' || props.dictationDisplayMode !== 'pinyin',
+    })
     if (currentRow.length >= colsPerRow) { rows.push(currentRow); currentRow = [] }
   }
   if (currentRow.length) rows.push(currentRow)
@@ -537,6 +509,44 @@ const charRows = computed(() => {
 .grid-row {
   display: flex;
   flex-wrap: nowrap;
+}
+
+.dictation-practice-row {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 5px;
+  padding: 7px 0 9px;
+  border-bottom: 1px solid #dce3df;
+  page-break-inside: avoid;
+}
+
+.dictation-unit {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dictation-pinyin-grid {
+  width: 100%;
+}
+
+.dictation-pinyin-grid .hint-pinyin {
+  display: block;
+  width: 100%;
+  color: #333;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.dictation-unit > .tianzi-cell,
+.dictation-unit > .mizi-cell,
+.dictation-unit > .square-cell {
+  flex-shrink: 0;
+  margin-top: 4px;
 }
 
 .dictation-cell {
