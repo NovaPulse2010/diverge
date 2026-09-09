@@ -39,7 +39,12 @@ const worksheetTitle = computed(() => {
 </script>
 
 <template>
-  <div class="app-layout">
+  <div
+    class="app-layout"
+    :class="{
+      'dictation-layout': config.module === 'dictation' && config.subject === 'yuwen',
+    }"
+  >
     <ControlPanel
       :config="config"
       :presets="presets"
@@ -150,6 +155,18 @@ const worksheetTitle = computed(() => {
   font-family: var(--font-kai);
   font-size: 16px;
   padding: 60px 0;
+}
+
+.dictation-layout .preview-area {
+  padding: 26px 34px 46px;
+  background-color: #edf3f0;
+  background-image: radial-gradient(circle, #cbd9d1 0.8px, transparent 0.8px);
+  background-size: 18px 18px;
+}
+
+.dictation-layout :deep(.panel) {
+  width: 280px;
+  min-width: 280px;
 }
 
 @media print {

@@ -802,7 +802,7 @@ const subjectThemes: Record<
   Subject,
   { color: string; bg: string; light: string }
 > = {
-  yuwen: { color: "#e54d42", bg: "#fff5f4", light: "#fde8e6" },
+  yuwen: { color: "#2aa86f", bg: "#eef9f2", light: "#d4f5e9" },
   shuxue: { color: "#2979d9", bg: "#f0f6ff", light: "#ddeaff" },
   yingyu: { color: "#22a870", bg: "#f0fdf7", light: "#d4f5e9" },
 };

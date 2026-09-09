@@ -308,6 +308,7 @@ const dictationRows = computed(() => {
 .chinese-dictation-grid {
   border-top: 1px solid #dce3df;
   border-left: 1px solid #dce3df;
+  overflow: hidden;
 }
 
 /* 标题 & 信息栏 */
@@ -418,6 +419,10 @@ const dictationRows = computed(() => {
   .dictation-module {
     display: block;
     flex: none;
+  }
+
+  .chinese-dictation-header {
+    display: none;
   }
 
   .dictation-header,
