@@ -9,6 +9,29 @@ export type DictationDisplayMode = 'pinyin' | 'hanzi' | 'both'
 export type StrokePattern = 'straight' | 'wave' | 'zigzag' | 'curve' | 'spiral' | 'circle'
 export type StrokeDifficulty = 'easy' | 'medium' | 'hard'
 
+export const DEFAULT_CHINESE_DICTATION_CONTENT = `爸爸
+皮球
+古诗
+雨衣
+老师
+太阳
+学校
+朋友
+春天
+高兴
+公园
+生日
+早上
+小河
+花朵
+风筝
+秋天
+新年
+中国
+动物
+图书馆
+博物馆`
+
 function getCurrentDate(): string {
   const now = new Date()
   const year = now.getFullYear()
@@ -21,6 +44,10 @@ export interface WorksheetConfig {
   subject: Subject
   module: ModuleType
   content: string
+  /** 语文默写汉字内容，与其他模块内容隔离 */
+  dictationContent: string
+  /** 可人工校正的语文默写拼音，每行对应一个词语 */
+  dictationPinyinContent: string
   gridType: GridType
   fontStyle: FontStyle
   color: CharColor
@@ -87,6 +114,8 @@ export const defaultConfig: WorksheetConfig = {
   subject: 'yuwen',
   module: 'chinese',
   content: '',
+  dictationContent: DEFAULT_CHINESE_DICTATION_CONTENT,
+  dictationPinyinContent: '',
   gridType: 'tianzi',
   fontStyle: 'kai',
   color: 'lightgray',

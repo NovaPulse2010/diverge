@@ -1,6 +1,6 @@
 <template>
   <div class="worksheet-page">
-    <div class="print-page-header" aria-hidden="true">
+    <div v-if="showPrintHeader" class="print-page-header" aria-hidden="true">
       <div class="print-page-title">{{ title }}</div>
       <div class="print-page-meta">
         <span>姓名：{{ studentName || "__________" }}</span>
@@ -22,6 +22,7 @@ import PageMeta from "@/components/common/PageMeta.vue";
 withDefaults(
   defineProps<{
     showMeta?: boolean;
+    showPrintHeader?: boolean;
     title?: string;
     studentName?: string;
     studentClass?: string;
@@ -30,6 +31,7 @@ withDefaults(
   }>(),
   {
     showMeta: true,
+    showPrintHeader: true,
     title: "练习字帖",
     studentName: "",
     studentClass: "",

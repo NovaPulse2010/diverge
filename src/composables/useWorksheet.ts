@@ -1,12 +1,31 @@
 import { reactive, watch } from 'vue'
 import { defaultConfig, type WorksheetConfig, type PresetTemplate, type Subject } from '@/types/worksheet'
 
-const STORAGE_KEY = 'worksheet-config-v1'
+const STORAGE_KEY = 'worksheet-config-v2'
+const LEGACY_STORAGE_KEY = 'worksheet-config-v1'
 
 function loadSaved(): Partial<WorksheetConfig> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : {}
+    const currentRaw = localStorage.getItem(STORAGE_KEY)
+    const legacyRaw = currentRaw ? null : localStorage.getItem(LEGACY_STORAGE_KEY)
+    const raw = currentRaw || legacyRaw
+    if (!raw) return {}
+    const saved = JSON.parse(raw) as Partial<WorksheetConfig>
+    const migratedLegacyDictation = !currentRaw && saved.module === 'dictation' && saved.subject === 'yuwen'
+    return {
+      ...saved,
+      ...(migratedLegacyDictation
+        ? {
+            dictationContent: defaultConfig.dictationContent,
+            dictationPinyinContent: '',
+            dictationMode: 'pinyin-only' as const,
+            dictationDisplayMode: 'pinyin' as const,
+            gridType: 'tianzi' as const,
+          }
+        : {}),
+      // 日期始终按当天生成，避免长期缓存旧日期。
+      worksheetDate: defaultConfig.worksheetDate,
+    }
   } catch {
     return {}
   }
@@ -83,7 +102,8 @@ export const presets: PresetTemplate[] = [
     config: {
       subject: 'yuwen',
       module: 'dictation',
-      content: '床前明月光疑是地上霜',
+      dictationContent: '床前明月光\n疑是地上霜',
+      dictationPinyinContent: '',
       gridType: 'tianzi',
       dictationMode: 'pinyin-only',
       gridColor: '#dc3545',

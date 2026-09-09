@@ -11,6 +11,13 @@ import DictationMode from "@/components/modules/DictationMode.vue";
 
 const { config, updateConfig, applyPreset, presets } = useWorksheet();
 
+const dictationCellCount = computed(() =>
+  config.dictationContent.replace(/\s+/g, '').length,
+);
+const dictationRowCount = computed(() =>
+  Math.max(1, Math.ceil(dictationCellCount.value / 8)),
+);
+
 const worksheetTitle = computed(() => {
   if (config.module === "dictation") {
     switch (config.dictationMode) {
@@ -52,6 +59,10 @@ const worksheetTitle = computed(() => {
       @preset="applyPreset"
     />
     <main class="preview-area">
+      <div v-if="config.module === 'dictation' && config.subject === 'yuwen'" class="dictation-preview-status">
+        <span>打印预览 · A4</span>
+        <span>每行 8 格 · {{ dictationCellCount }} 格 / {{ dictationRowCount }} 行</span>
+      </div>
       <WorksheetPage
         :show-meta="
           !(
@@ -61,6 +72,7 @@ const worksheetTitle = computed(() => {
               config.dictationMode === 'emoji-hint')
           )
         "
+        :show-print-header="!(config.module === 'dictation' && config.subject === 'yuwen')"
         :title="worksheetTitle"
         :student-name="config.studentName"
         :student-class="config.studentClass"
@@ -103,6 +115,8 @@ const worksheetTitle = computed(() => {
         <DictationMode
           v-else-if="config.module === 'dictation'"
           :content="config.content"
+          :dictation-content="config.dictationContent"
+          :dictation-pinyin-content="config.dictationPinyinContent"
           :dictation-mode="config.dictationMode"
           :dictation-display-mode="config.dictationDisplayMode"
           :row-cols="config.englishRowCols"
@@ -158,15 +172,33 @@ const worksheetTitle = computed(() => {
 }
 
 .dictation-layout .preview-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 26px 34px 46px;
   background-color: #edf3f0;
-  background-image: radial-gradient(circle, #cbd9d1 0.8px, transparent 0.8px);
-  background-size: 18px 18px;
+  background-image: none;
+}
+
+.dictation-preview-status {
+  display: flex;
+  justify-content: space-between;
+  width: min(750px, 100%);
+  margin: 0 auto 12px;
+  color: #74817a;
+  font-size: 12px;
 }
 
 .dictation-layout :deep(.panel) {
   width: 280px;
   min-width: 280px;
+}
+
+.dictation-layout :deep(.worksheet-page) {
+  width: min(750px, 100%);
+  min-height: 970px;
+  padding: 38px;
+  box-shadow: 0 10px 34px rgba(34, 49, 45, 0.16);
 }
 
 @media print {
@@ -182,6 +214,17 @@ const worksheetTitle = computed(() => {
     background-image: none;
     display: block;
   }
+
+  .dictation-layout .worksheet-page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 15mm;
+    box-shadow: none;
+  }
+
+  .dictation-layout .dictation-preview-status {
+    display: none;
+  }
 }
 </style>
 
@@ -191,5 +234,21 @@ const worksheetTitle = computed(() => {
   .panel {
     display: none !important;
   }
+
+  .dictation-layout .print-page-header {
+    display: none !important;
+  }
+
+  .dictation-layout .worksheet-page {
+    page: chinese-dictation;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    padding: 15mm !important;
+  }
+}
+
+@page chinese-dictation {
+  size: A4;
+  margin: 0;
 }
 </style>

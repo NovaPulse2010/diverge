@@ -4,13 +4,14 @@
     <header class="panel-brand">
       <div class="brand-mark">字</div>
       <div class="brand-text">
-        <p class="brand-title">练习字帖</p>
-        <p class="brand-sub">综合生成器</p>
+        <p class="brand-title">{{ isYuwenDictation ? '语文默写' : '练习字帖' }}</p>
+        <p class="brand-sub">{{ isYuwenDictation ? 'A4 节省纸张版' : '综合生成器' }}</p>
       </div>
+      <button v-if="isYuwenDictation" class="dictation-exit" type="button" @click="updateConfig({ module: 'chinese' })">返回</button>
     </header>
 
     <!-- ── Subject Tabs ── -->
-    <div class="subject-row">
+    <div v-if="!isYuwenDictation" class="subject-row">
       <button
         v-for="s in subjects"
         :key="s.id"
@@ -26,7 +27,7 @@
     <!-- ── Scrollable Body ── -->
     <div class="panel-body">
       <!-- Module Grid -->
-      <div class="panel-block">
+      <div v-if="!isYuwenDictation" class="panel-block">
         <div class="block-title">练习内容</div>
         <div class="module-grid" :class="`cols-${currentModules.length}`">
           <button
@@ -42,7 +43,7 @@
         </div>
       </div>
 
-      <div class="divider" />
+      <div v-if="!isYuwenDictation" class="divider" />
 
       <!-- Content Textarea -->
       <div v-if="showContentInput" class="panel-block">
@@ -218,68 +219,62 @@
       <template
         v-else-if="config.module === 'dictation' && config.subject === 'yuwen'"
       >
-        <div class="panel-block dictation-tool-block">
-          <div class="block-title">汉字转拼音</div>
-          <div class="tool-hint">输入汉字后自动生成带声调拼音，多音字可直接校正。</div>
-          <textarea
-            class="content-ta tool-input"
-            :value="config.content"
-            placeholder="如：爸爸 皮球 古诗"
-            rows="2"
-            @input="updateConfig({ content: ($event.target as HTMLTextAreaElement).value })"
-          />
-          <div class="tool-result">
-            <span>转换结果</span>
-            <strong>{{ convertedPinyin || '输入汉字后显示拼音' }}</strong>
-          </div>
-          <div class="tool-actions">
-            <button class="tool-action" :class="{ active: config.dictationDisplayMode === 'pinyin' }" type="button" @click="updateConfig({ dictationDisplayMode: 'pinyin' })">只显示拼音</button>
-            <button class="tool-action" :class="{ active: config.dictationDisplayMode === 'hanzi' }" type="button" @click="updateConfig({ dictationDisplayMode: 'hanzi' })">只显示汉字</button>
-            <button class="tool-action" :class="{ active: config.dictationDisplayMode === 'both' }" type="button" @click="updateConfig({ dictationDisplayMode: 'both' })">两者都显示</button>
-          </div>
-        </div>
         <div class="panel-block">
-          <div class="block-title">默写模式</div>
-          <div class="chips wrap">
+          <div class="block-title">录入与默写方式</div>
+          <div class="dictation-mode-cards">
             <button
               v-for="dm in yuwenDictModes"
               :key="dm.value"
-              class="chip"
+              class="dictation-mode-card"
               :class="{ active: config.dictationMode === dm.value }"
               @click="setYuwenDictationMode(dm.value)"
             >
-              {{ dm.label }}
+              <strong>{{ dm.value === 'pinyin-only' ? '拼音 → 汉字' : '汉字 → 拼音' }}</strong>
+              <span>{{ dm.label }}</span>
             </button>
           </div>
         </div>
 
         <div class="panel-block">
-          <div class="block-title">格体</div>
-          <div class="chips">
-            <button
-              v-for="g in gridTypes"
-              :key="g.value"
-              class="chip"
-              :class="{ active: config.gridType === g.value }"
-              @click="updateConfig({ gridType: g.value })"
-            >
-              {{ g.label }}
-            </button>
-          </div>
+          <div class="block-title">纸张规格</div>
+          <div class="dictation-paper-spec">A4 竖版 · 每行 8 格 · 拼音在上、田字格在下</div>
         </div>
 
-        <div class="panel-block">
-          <div class="block-title">格线颜色</div>
-          <input
-            type="color"
-            class="color-picker"
-            :value="config.gridColor"
-            @input="
-              updateConfig({
-                gridColor: ($event.target as HTMLInputElement).value,
-              })
-            "
+        <div class="panel-block dictation-tool-block">
+          <div class="block-title">汉字转拼音</div>
+          <div class="tool-hint">每行输入一个词语，自动生成带声调拼音。</div>
+          <textarea
+            class="content-ta tool-input"
+            :value="config.dictationContent"
+            placeholder="如：爸爸 皮球 古诗"
+            rows="4"
+            @input="updateDictationSource"
           />
+          <div class="tool-result">
+            <span>转换结果</span>
+            <strong>{{ convertedPinyin.replace(/\n/g, ' · ') || '输入汉字后显示拼音' }}</strong>
+          </div>
+          <div class="tool-actions">
+            <button class="tool-action active" type="button" @click="applyAutomaticPinyin">应用到内容</button>
+            <button class="tool-action" type="button" @click="focusPinyinEditor">校正拼音</button>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <div class="block-title">拼音内容（每行一个词语）</div>
+          <textarea
+            ref="pinyinEditor"
+            class="content-ta dictation-pinyin-editor"
+            :value="editablePinyin"
+            rows="6"
+            @input="updateConfig({ dictationPinyinContent: ($event.target as HTMLTextAreaElement).value })"
+          />
+          <div class="tool-hint">可直接修改多音字；空白时使用自动转换结果。</div>
+          <div class="dictation-display-choice">
+            <button class="tool-action" :class="{ active: config.dictationDisplayMode === 'pinyin' }" @click="updateConfig({ dictationDisplayMode: 'pinyin' })">只显示拼音</button>
+            <button class="tool-action" :class="{ active: config.dictationDisplayMode === 'hanzi' }" @click="updateConfig({ dictationDisplayMode: 'hanzi' })">只显示汉字</button>
+            <button class="tool-action" :class="{ active: config.dictationDisplayMode === 'both' }" @click="updateConfig({ dictationDisplayMode: 'both' })">两者都显示</button>
+          </div>
         </div>
       </template>
 
@@ -757,14 +752,14 @@
           />
           <rect x="6" y="14" width="12" height="8" />
         </svg>
-        打印字帖
+        {{ isYuwenDictation ? '打印语文默写' : '打印字帖' }}
       </button>
     </footer>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type {
   WorksheetConfig,
   PresetTemplate,
@@ -773,6 +768,7 @@ import type {
   ModuleType,
   DictationSubMode,
 } from "@/types/worksheet";
+import { DEFAULT_CHINESE_DICTATION_CONTENT } from "@/types/worksheet";
 import { usePrint } from "@/composables/usePrint";
 import { usePinyin } from "@/composables/usePinyin";
 
@@ -788,10 +784,18 @@ const emit = defineEmits<{
 
 const { printWorksheet } = usePrint();
 const { getTextPinyinPairs } = usePinyin();
+const pinyinEditor = ref<HTMLTextAreaElement | null>(null);
+
+const dictationSource = computed(() => props.config.dictationContent);
 
 const convertedPinyin = computed(() =>
-  getTextPinyinPairs(props.config.content).map(item => item.pinyin).join(' '),
+  dictationSource.value
+    .split(/\n/)
+    .map(line => getTextPinyinPairs(line).map(item => item.pinyin).filter(Boolean).join(' '))
+    .join('\n'),
 );
+
+const editablePinyin = computed(() => props.config.dictationPinyinContent || convertedPinyin.value);
 
 function updateConfig(partial: Partial<WorksheetConfig>) {
   emit("update", partial);
@@ -811,6 +815,10 @@ const themeVars = computed(() => {
   const t = subjectThemes[props.config.subject] ?? subjectThemes.yuwen;
   return { "--t-color": t.color, "--t-bg": t.bg, "--t-light": t.light };
 });
+
+const isYuwenDictation = computed(
+  () => props.config.module === 'dictation' && props.config.subject === 'yuwen',
+);
 
 // ── Subjects ──
 const subjects = [
@@ -867,7 +875,14 @@ function isModuleActive(m: ModuleItem): boolean {
 
 function selectModule(m: ModuleItem) {
   const partial: Partial<WorksheetConfig> = { module: m.id };
-  if (m.dictMode) partial.dictationMode = m.dictMode;
+  if (m.dictMode) {
+    partial.dictationMode = m.dictMode;
+    if (m.uid === 'dict-yuwen' && !props.config.dictationContent.trim()) {
+      partial.dictationContent = DEFAULT_CHINESE_DICTATION_CONTENT;
+      partial.dictationPinyinContent = '';
+      partial.dictationDisplayMode = 'pinyin';
+    }
+  }
   updateConfig(partial);
 }
 
@@ -876,6 +891,21 @@ function setYuwenDictationMode(mode: 'pinyin-only' | 'char-only') {
     dictationMode: mode,
     dictationDisplayMode: mode === 'char-only' ? 'hanzi' : 'pinyin',
   })
+}
+
+function updateDictationSource(event: Event) {
+  updateConfig({
+    dictationContent: (event.target as HTMLTextAreaElement).value,
+    dictationPinyinContent: '',
+  });
+}
+
+function applyAutomaticPinyin() {
+  updateConfig({ dictationPinyinContent: convertedPinyin.value });
+}
+
+function focusPinyinEditor() {
+  pinyinEditor.value?.focus();
 }
 
 // ── Content input ──
@@ -1055,6 +1085,91 @@ function toggleStrokePattern(pattern: StrokePattern) {
 .tool-action.active {
   color: #fff;
   background: var(--t-color);
+}
+
+/* ── 语文默写专用控制区 ── */
+.dictation-exit {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border: 1px solid #cbd7d1;
+  border-radius: 7px;
+  color: #4c6358;
+  background: #f4f8f5;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.dictation-mode-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid #d9e4de;
+  border-radius: 12px;
+  background: #f3f7f5;
+}
+
+.dictation-mode-card {
+  min-width: 0;
+  padding: 9px 5px 8px;
+  border: 0;
+  border-radius: 9px;
+  color: #74817a;
+  background: transparent;
+  text-align: center;
+  cursor: pointer;
+}
+
+.dictation-mode-card.active {
+  color: #fff;
+  background: var(--t-color);
+  box-shadow: 0 2px 7px color-mix(in srgb, var(--t-color) 26%, transparent);
+}
+
+.dictation-mode-card strong,
+.dictation-mode-card span {
+  display: block;
+}
+
+.dictation-mode-card strong {
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.dictation-mode-card span {
+  margin-top: 3px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.dictation-paper-spec {
+  padding: 10px;
+  border: 1px solid #d9e4de;
+  border-radius: 9px;
+  color: #187b54;
+  background: #eef9f2;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.dictation-pinyin-editor {
+  min-height: 126px;
+  max-height: 190px;
+  font-size: 12px;
+  line-height: 1.55;
+  background: #fff;
+}
+
+.dictation-display-choice {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.dictation-display-choice .tool-action {
+  min-width: 0;
+  padding: 7px 2px;
 }
 
 /* ── Brand ── */
