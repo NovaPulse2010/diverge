@@ -35,9 +35,29 @@ withDefaults(
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    linear-gradient(to right, transparent calc(50% - 0.4px), var(--guide-c) calc(50% - 0.4px), var(--guide-c) calc(50% + 0.4px), transparent calc(50% + 0.4px)),
-    linear-gradient(to bottom, transparent calc(50% - 0.4px), var(--guide-c) calc(50% - 0.4px), var(--guide-c) calc(50% + 0.4px), transparent calc(50% + 0.4px));
+  background: transparent;
+}
+
+.tianzi-cell::before,
+.tianzi-cell::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.72;
+}
+
+.tianzi-cell::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 1px solid var(--guide-c);
+}
+
+.tianzi-cell::after {
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px solid var(--guide-c);
 }
 
 /* 合并相邻边框 */

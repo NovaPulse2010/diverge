@@ -36,12 +36,10 @@ withDefaults(
   align-items: center;
   justify-content: center;
   background:
-    /* 十字辅助线 */
-    linear-gradient(to right, transparent calc(50% - 0.4px), var(--guide-c) calc(50% - 0.4px), var(--guide-c) calc(50% + 0.4px), transparent calc(50% + 0.4px)),
-    linear-gradient(to bottom, transparent calc(50% - 0.4px), var(--guide-c) calc(50% - 0.4px), var(--guide-c) calc(50% + 0.4px), transparent calc(50% + 0.4px)),
-    /* 对角线 */
-    linear-gradient(45deg, transparent calc(50% - 0.4px), var(--guide-c) calc(50% - 0.4px), var(--guide-c) calc(50% + 0.4px), transparent calc(50% + 0.4px)),
-    linear-gradient(135deg, transparent calc(50% - 0.4px), var(--guide-c) calc(50% - 0.4px), var(--guide-c) calc(50% + 0.4px), transparent calc(50% + 0.4px));
+    linear-gradient(to right, transparent 49%, var(--guide-c) 49%, var(--guide-c) 51%, transparent 51%),
+    linear-gradient(to bottom, transparent 49%, var(--guide-c) 49%, var(--guide-c) 51%, transparent 51%),
+    linear-gradient(45deg, transparent 49%, var(--guide-c) 49%, var(--guide-c) 51%, transparent 51%),
+    linear-gradient(135deg, transparent 49%, var(--guide-c) 49%, var(--guide-c) 51%, transparent 51%);
 }
 
 .mizi-cell + .mizi-cell {
