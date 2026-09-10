@@ -240,6 +240,21 @@
           <div class="dictation-paper-spec">A4 竖版 · 每行 8 格 · 拼音在上、田字格在下</div>
         </div>
 
+        <div class="panel-block">
+          <div class="block-title">格子类型</div>
+          <div class="chips">
+            <button
+              v-for="g in gridTypes"
+              :key="g.value"
+              class="chip"
+              :class="{ active: config.gridType === g.value }"
+              @click="updateConfig({ gridType: g.value })"
+            >
+              {{ g.label }}
+            </button>
+          </div>
+        </div>
+
         <div class="panel-block dictation-tool-block">
           <div class="block-title">汉字转拼音</div>
           <div class="tool-hint">每行输入一个词语，自动生成带声调拼音。</div>

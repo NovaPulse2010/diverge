@@ -77,7 +77,7 @@
         :pinyin-content="dictationPinyinContent"
         :dictation-mode="dictationMode"
         :display-mode="dictationDisplayMode"
-        grid-type="tianzi"
+        :grid-type="gridType"
         grid-color="#df7269"
         grid-top-color="#318b63"
         grid-mid-color="#9bd2b6"

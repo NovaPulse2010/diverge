@@ -26,7 +26,7 @@
     <text
       v-if="text"
       x="50%"
-      y="30.5"
+      y="28.5"
       class="pinyin-guide__text"
       :class="textSizeClass"
       dominant-baseline="alphabetic"
