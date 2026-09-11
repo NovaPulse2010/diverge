@@ -75,6 +75,11 @@
       <ChineseDictationSheet
         :content="chineseContent"
         :pinyin-content="dictationPinyinContent"
+        :pinyin-font-size="dictationPinyinFontSize"
+        :pinyin-guide-height="dictationPinyinGuideHeight"
+        :hanzi-font-size="dictationHanziFontSize"
+        :hanzi-color="dictationHanziColor"
+        :grid-size="dictationGridSize"
         :dictation-mode="dictationMode"
         :display-mode="dictationDisplayMode"
         :grid-type="gridType"
@@ -105,6 +110,11 @@ const props = withDefaults(
     /** 语文默写专用汉字内容；存在时优先于通用 content */
     dictationContent?: string
     dictationPinyinContent?: string
+    dictationPinyinFontSize?: number
+    dictationPinyinGuideHeight?: number
+    dictationHanziFontSize?: number
+    dictationHanziColor?: string
+    dictationGridSize?: number
     dictationMode?: DictationSubMode
     dictationDisplayMode?: DictationDisplayMode
     rowCols?: number[]
@@ -127,6 +137,11 @@ const props = withDefaults(
   }>(),
   {
     dictationPinyinContent: '',
+    dictationPinyinFontSize: 26,
+    dictationPinyinGuideHeight: 43,
+    dictationHanziFontSize: 30,
+    dictationHanziColor: '#a5a5a5',
+    dictationGridSize: 52,
     dictationMode: 'pinyin-only',
     dictationDisplayMode: 'pinyin',
     rowCols: () => [4],

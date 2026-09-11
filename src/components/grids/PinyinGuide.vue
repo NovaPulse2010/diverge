@@ -2,33 +2,34 @@
   <svg
     class="pinyin-guide"
     width="100%"
-    height="43"
+    :height="height"
+    :style="{ height: height + 'px' }"
     :aria-label="text || undefined"
   >
-    <line x1="0" y1="0.5" x2="100%" y2="0.5" :stroke="topColor" />
+    <line x1="0" :y1="lineTop" x2="100%" :y2="lineTop" :stroke="topColor" />
     <line
       x1="0"
-      y1="14.5"
+      :y1="lineUpper"
       x2="100%"
-      y2="14.5"
+      :y2="lineUpper"
       :stroke="midColor"
       :stroke-dasharray="lineDash"
     />
     <line
       x1="0"
-      y1="28.5"
+      :y1="lineBaseline"
       x2="100%"
-      y2="28.5"
+      :y2="lineBaseline"
       :stroke="baseColor"
       :stroke-dasharray="lineDash"
     />
-    <line x1="0" y1="42.5" x2="100%" y2="42.5" :stroke="topColor" />
+    <line x1="0" :y1="lineBottom" x2="100%" :y2="lineBottom" :stroke="topColor" />
     <text
       v-if="text"
       x="50%"
-      y="28.5"
+      :y="lineBaseline"
       class="pinyin-guide__text"
-      :class="textSizeClass"
+      :style="textStyle"
       dominant-baseline="alphabetic"
       text-anchor="middle"
     >{{ text }}</text>
@@ -45,6 +46,8 @@ const props = withDefaults(
     midColor?: string
     baseColor?: string
     lineStyle?: 'dashed' | 'solid'
+    height?: number
+    fontSize?: number
   }>(),
   {
     text: '',
@@ -52,16 +55,21 @@ const props = withDefaults(
     midColor: '#9bd2b6',
     baseColor: '#e79a93',
     lineStyle: 'solid',
+    height: 43,
+    fontSize: 26,
   },
 )
 
 const lineDash = computed(() => props.lineStyle === 'dashed' ? '4 3' : undefined)
+const lineTop = computed(() => 0.5)
+const lineUpper = computed(() => Math.round(props.height / 3) + 0.5)
+const lineBaseline = computed(() => Math.round(props.height * 2 / 3) + 0.5)
+const lineBottom = computed(() => props.height - 0.5)
 
-const textSizeClass = computed(() => {
+const textStyle = computed(() => {
   const length = Array.from(props.text).length
-  if (length >= 7) return 'pinyin-guide__text--small'
-  if (length >= 5) return 'pinyin-guide__text--compact'
-  return ''
+  const scale = length >= 7 ? 0.76 : length >= 5 ? 0.88 : 1
+  return { fontSize: `${Math.round(props.fontSize * scale)}px` }
 })
 </script>
 
@@ -84,15 +92,6 @@ const textSizeClass = computed(() => {
   letter-spacing: -0.35px;
 }
 
-.pinyin-guide__text--compact {
-  font-size: 23px;
-  letter-spacing: -0.55px;
-}
-
-.pinyin-guide__text--small {
-  font-size: 20px;
-  letter-spacing: -0.65px;
-}
 
 @media print {
   .pinyin-guide {

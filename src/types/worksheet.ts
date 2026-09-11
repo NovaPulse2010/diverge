@@ -48,6 +48,16 @@ export interface WorksheetConfig {
   dictationContent: string
   /** 可人工校正的语文默写拼音，每行对应一个词语 */
   dictationPinyinContent: string
+  /** 语文默写拼音字号 */
+  dictationPinyinFontSize: number
+  /** 语文默写四线格高度 */
+  dictationPinyinGuideHeight: number
+  /** 语文默写汉字字号 */
+  dictationHanziFontSize: number
+  /** 语文默写汉字颜色 */
+  dictationHanziColor: string
+  /** 语文默写田字格尺寸 */
+  dictationGridSize: number
   gridType: GridType
   fontStyle: FontStyle
   color: CharColor
@@ -116,6 +126,11 @@ export const defaultConfig: WorksheetConfig = {
   content: '',
   dictationContent: DEFAULT_CHINESE_DICTATION_CONTENT,
   dictationPinyinContent: '',
+  dictationPinyinFontSize: 26,
+  dictationPinyinGuideHeight: 43,
+  dictationHanziFontSize: 30,
+  dictationHanziColor: '#a5a5a5',
+  dictationGridSize: 52,
   gridType: 'tianzi',
   fontStyle: 'kai',
   color: 'lightgray',

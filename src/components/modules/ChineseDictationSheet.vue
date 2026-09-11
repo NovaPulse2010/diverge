@@ -28,6 +28,8 @@
         >
           <PinyinGuide
             :text="showPinyin ? cell.pinyin : ''"
+            :font-size="pinyinFontSize"
+            :height="pinyinGuideHeight"
             :top-color="gridTopColor"
             :mid-color="gridMidColor"
             :base-color="gridBaseColor"
@@ -35,12 +37,16 @@
           />
           <component
             :is="gridComponent"
-            :size="52"
+            :size="gridSize"
             :border-color="gridColor"
             :guide-color="guideColor"
             class="chinese-sheet__hanzi-grid"
           >
-            <span v-if="showHanzi" class="chinese-sheet__hanzi">{{ cell.char }}</span>
+            <span
+              v-if="showHanzi"
+              class="chinese-sheet__hanzi"
+              :style="{ color: hanziColor, fontSize: hanziFontSize + 'px' }"
+            >{{ cell.char }}</span>
           </component>
         </div>
       </div>
@@ -74,6 +80,11 @@ const props = withDefaults(
   defineProps<{
     content: string
     pinyinContent?: string
+    pinyinFontSize?: number
+    pinyinGuideHeight?: number
+    hanziFontSize?: number
+    hanziColor?: string
+    gridSize?: number
     dictationMode?: DictationSubMode
     displayMode?: DictationDisplayMode
     gridType?: GridType
@@ -88,6 +99,11 @@ const props = withDefaults(
   }>(),
   {
     pinyinContent: '',
+    pinyinFontSize: 26,
+    pinyinGuideHeight: 43,
+    hanziFontSize: 30,
+    hanziColor: '#a5a5a5',
+    gridSize: 52,
     dictationMode: 'pinyin-only',
     displayMode: 'pinyin',
     gridType: 'tianzi',

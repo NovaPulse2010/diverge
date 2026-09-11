@@ -255,6 +255,54 @@
           </div>
         </div>
 
+        <div class="panel-block">
+          <div class="block-title">拼音样式</div>
+          <div class="field-row">
+            <label class="field">
+              <span class="field-label">四线间距</span>
+              <div class="row-col-stepper">
+                <button class="step-btn" :disabled="config.dictationPinyinGuideHeight <= 36" @click="updateConfig({ dictationPinyinGuideHeight: config.dictationPinyinGuideHeight - 1 })">−</button>
+                <span class="step-val">{{ config.dictationPinyinGuideHeight }}px</span>
+                <button class="step-btn" :disabled="config.dictationPinyinGuideHeight >= 56" @click="updateConfig({ dictationPinyinGuideHeight: config.dictationPinyinGuideHeight + 1 })">+</button>
+              </div>
+            </label>
+            <label class="field">
+              <span class="field-label">字号</span>
+              <div class="row-col-stepper">
+                <button class="step-btn" :disabled="config.dictationPinyinFontSize <= 18" @click="updateConfig({ dictationPinyinFontSize: config.dictationPinyinFontSize - 1 })">−</button>
+                <span class="step-val">{{ config.dictationPinyinFontSize }}px</span>
+                <button class="step-btn" :disabled="config.dictationPinyinFontSize >= 30" @click="updateConfig({ dictationPinyinFontSize: config.dictationPinyinFontSize + 1 })">+</button>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <div class="block-title">汉字与格子</div>
+          <div class="field-row">
+            <label class="field">
+              <span class="field-label">汉字字号</span>
+              <div class="row-col-stepper">
+                <button class="step-btn" :disabled="config.dictationHanziFontSize <= 24" @click="updateConfig({ dictationHanziFontSize: config.dictationHanziFontSize - 1 })">−</button>
+                <span class="step-val">{{ config.dictationHanziFontSize }}px</span>
+                <button class="step-btn" :disabled="config.dictationHanziFontSize >= 36" @click="updateConfig({ dictationHanziFontSize: config.dictationHanziFontSize + 1 })">+</button>
+              </div>
+            </label>
+            <label class="field">
+              <span class="field-label">格子尺寸</span>
+              <div class="row-col-stepper">
+                <button class="step-btn" :disabled="config.dictationGridSize <= 44" @click="updateConfig({ dictationGridSize: config.dictationGridSize - 1 })">−</button>
+                <span class="step-val">{{ config.dictationGridSize }}px</span>
+                <button class="step-btn" :disabled="config.dictationGridSize >= 56" @click="updateConfig({ dictationGridSize: config.dictationGridSize + 1 })">+</button>
+              </div>
+            </label>
+          </div>
+          <label class="grid-color-item" style="margin-top: 8px" title="汉字颜色">
+            <span class="grid-color-label">汉字颜色</span>
+            <input type="color" class="color-picker-inline" :value="config.dictationHanziColor" @input="updateConfig({ dictationHanziColor: ($event.target as HTMLInputElement).value })" />
+          </label>
+        </div>
+
         <div class="panel-block dictation-tool-block">
           <div class="block-title">汉字转拼音</div>
           <div class="tool-hint">每行输入一个词语，自动生成带声调拼音。</div>
