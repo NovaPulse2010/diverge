@@ -374,7 +374,7 @@ const itemGroups = computed(() => {
 
 /* ---- 单词/短语多列模式 ---- */
 .hint-group {
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   page-break-inside: avoid;
 }
 
@@ -403,7 +403,7 @@ const itemGroups = computed(() => {
 .writing-row {
   display: grid;
   gap: 6px;
-  margin-bottom: 4px;
+  margin-bottom: 0;
 }
 
 .grid-col {
