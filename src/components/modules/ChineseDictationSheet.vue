@@ -67,6 +67,7 @@
         v-for="rowIndex in correctionRowCount"
         :key="`correction-${rowIndex}`"
         class="chinese-sheet__correction-row"
+        :style="{ gridTemplateColumns: `repeat(${correctionCellsPerRow}, var(--dictation-cell-size))` }"
       >
         <component
           v-for="cellIndex in correctionCellsPerRow"
@@ -222,6 +223,7 @@ const cellsByWord = computed<DictationCell[][]>(() => {
 const sheetRef = ref<HTMLElement | null>(null)
 const sheetWidth = ref(0)
 const wordSpacerRatio = 0.35
+const characterGap = 10
 
 let resizeObserver: ResizeObserver | undefined
 onMounted(() => {
@@ -238,21 +240,36 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 // 根据纸张实际宽度计算可用的“格子单位”，不再固定每行只能放 8 格。
 const rowCapacity = computed(() => {
   if (!sheetWidth.value) return 8
-  const horizontalPadding = 20
+  const horizontalPadding = 22 // 10px padding on each side plus the two outer borders
   return Math.max(1, (sheetWidth.value - horizontalPadding) / props.gridSize)
 })
-const rows = computed(() => packDictationWords(cellsByWord.value, rowCapacity.value, wordSpacerRatio))
+const rows = computed(() => packDictationWords(
+  cellsByWord.value,
+  rowCapacity.value,
+  wordSpacerRatio,
+  characterGap / props.gridSize,
+))
 
 // 格子按实际尺寸紧凑排列，词语之间保留清晰但不过宽的留白。
 const wordSpacerTrack = `calc(var(--dictation-cell-size) * ${wordSpacerRatio})`
 function rowGridTemplate(row: readonly (DictationCell | null)[]): string {
   return row
-    .map(cell => cell ? 'var(--dictation-cell-size)' : wordSpacerTrack)
+    .map((cell, index) => {
+      if (!cell) return wordSpacerTrack
+      return row[index + 1]
+        ? `calc(var(--dictation-cell-size) + ${characterGap}px)`
+        : 'var(--dictation-cell-size)'
+    })
     .join(' ')
 }
 
 const correctionRowCount = 2
-const correctionCellsPerRow = 8
+const correctionCellGap = 5
+const correctionCellsPerRow = computed(() => {
+  if (!sheetWidth.value) return 8
+  const availableWidth = Math.max(props.gridSize, sheetWidth.value - 20)
+  return Math.max(1, Math.floor((availableWidth + correctionCellGap) / (props.gridSize + correctionCellGap)))
+})
 
 const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + word.length, 0))
 </script>
@@ -346,6 +363,10 @@ const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + w
   text-align: center;
 }
 
+.chinese-sheet__unit:not(.chinese-sheet__unit--spacer) {
+  width: var(--dictation-cell-size);
+}
+
 .chinese-sheet__hanzi-grid {
   margin: 4px auto 0;
   flex-shrink: 0;
@@ -374,9 +395,10 @@ const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + w
 }
 
 .chinese-sheet__correction-row {
+  --correction-cell-gap: 5px;
   display: grid;
-  grid-template-columns: repeat(8, var(--dictation-cell-size));
-  gap: 0;
+  column-gap: var(--correction-cell-gap);
+  row-gap: 0;
   padding: 8px 10px 0;
   break-inside: avoid;
   page-break-inside: avoid;

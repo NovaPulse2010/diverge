@@ -3,11 +3,13 @@
  *
  * `columns` is a width budget measured in character-cell units. `separator`
  * lets the visual gap between entries be narrower than a full character cell.
+ * `characterGap` reserves space only between characters inside each entry.
  */
 export function packDictationWords<T>(
   words: readonly (readonly T[])[],
   columns = 8,
   separator = 1,
+  characterGap = 0,
 ): (T | null)[][] {
   const rows: (T | null)[][] = []
   let row: (T | null)[] = []
@@ -15,8 +17,9 @@ export function packDictationWords<T>(
 
   for (const word of words) {
     if (!word.length) continue
+    const wordWidth = word.length + (word.length - 1) * characterGap
     const separatorWidth = row.length ? separator : 0
-    if (row.length && rowWidth + separatorWidth + word.length > columns) {
+    if (row.length && rowWidth + separatorWidth + wordWidth > columns + 1e-9) {
       rows.push(row)
       row = []
       rowWidth = 0
@@ -26,7 +29,7 @@ export function packDictationWords<T>(
       rowWidth += separator
     }
     row.push(...word)
-    rowWidth += word.length
+    rowWidth += wordWidth
     // An entry longer than the available width gets its own row, never a partial word.
     if (rowWidth >= columns) {
       rows.push(row)

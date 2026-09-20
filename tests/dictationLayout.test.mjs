@@ -41,3 +41,27 @@ test('uses a fractional separator when packing to the actual row width', () => {
     ['帽子 橱窗 脑袋 书包 香蕉', '春天'],
   )
 })
+
+test('includes character gaps in the row budget without adding gaps at word edges', () => {
+  const words = ['帽子', '橱窗', '脑袋'].map(word => Array.from(word))
+  // Two 52px cells + 5px per word, plus an 18.2px word separator = 236.2px.
+  assert.deepEqual(textRows(packDictationWords(words, 236.2 / 52, 0.35, 5 / 52)),
+    ['帽子 橱窗', '脑袋'])
+  assert.deepEqual(textRows(packDictationWords(words, 236 / 52, 0.35, 5 / 52)),
+    ['帽子', '橱窗', '脑袋'])
+})
+
+test('supports the requested 10px gap between characters in one word', () => {
+  const words = ['帽子', '橱窗'].map(word => Array.from(word))
+  // Two 52px cells plus a 10px internal gap per word.
+  assert.deepEqual(textRows(packDictationWords(words, 246.2 / 52, 0.35, 10 / 52)),
+    ['帽子 橱窗'])
+  assert.deepEqual(textRows(packDictationWords(words, 245 / 52, 0.35, 10 / 52)),
+    ['帽子', '橱窗'])
+})
+
+test('single characters have no internal gap and four-character words stay intact', () => {
+  const words = ['春', '夏', '各式各样', '秋'].map(word => Array.from(word))
+  assert.deepEqual(textRows(packDictationWords(words, 223 / 52, 0.35, 5 / 52)),
+    ['春 夏', '各式各样', '秋'])
+})

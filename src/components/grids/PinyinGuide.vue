@@ -4,7 +4,7 @@
     width="100%"
     :height="height"
     :style="{ height: height + 'px' }"
-    :aria-label="text || undefined"
+    :aria-label="normalizedText || undefined"
   >
     <line x1="0" :y1="lineTop" x2="100%" :y2="lineTop" :stroke="topColor" />
     <line
@@ -25,16 +25,17 @@
     />
     <line x1="0" :y1="lineBottom" x2="100%" :y2="lineBottom" :stroke="topColor" />
     <text
-      v-if="text"
+      v-if="normalizedText"
       x="50%"
       :y="lineBaseline"
       class="pinyin-guide__text"
       :style="textStyle"
-      :textLength="textLength"
-      lengthAdjust="spacingAndGlyphs"
+      font-family="Arial, Helvetica, sans-serif"
+      font-weight="400"
+      font-style="normal"
       dominant-baseline="alphabetic"
       text-anchor="middle"
-    >{{ text }}</text>
+    >{{ normalizedText }}</text>
   </svg>
 </template>
 
@@ -69,20 +70,17 @@ const lineTop = computed(() => 0.5)
 const lineUpper = computed(() => Math.round(props.height / 3) + 0.5)
 const lineBaseline = computed(() => Math.round(props.height * 2 / 3) + 0.5)
 const lineBottom = computed(() => props.height - 0.5)
+const normalizedText = computed(() => props.text.normalize('NFC'))
 
-const textLength = computed(() => {
-  if (!props.text) return undefined
-  const length = Array.from(props.text).length
-  const scale = length >= 7 ? 0.76 : length >= 5 ? 0.88 : 1
-  const estimatedWidth = length * props.fontSize * 0.58 * scale
-  return Math.min(estimatedWidth, props.width * 0.86)
-})
-
-const textStyle = computed(() => {
-  const length = Array.from(props.text).length
-  const scale = length >= 7 ? 0.76 : length >= 5 ? 0.88 : 1
-  return { fontSize: `${Math.round(props.fontSize * scale)}px` }
-})
+const textStyle = computed(() => ({
+  // Match the compact chuāng appearance for every syllable. Keep the
+  // vertical size unchanged and apply one shared horizontal scale so
+  // short and long pinyin use the same visual treatment.
+  fontSize: `${props.fontSize}px`,
+  fontWeight: 400,
+  fontStyle: 'normal',
+  fontSynthesis: 'none',
+}))
 </script>
 
 <style scoped>
@@ -90,18 +88,24 @@ const textStyle = computed(() => {
   display: block;
   width: 100%;
   height: 43px;
-  overflow: hidden;
+  overflow: visible;
   color: #26352f;
 }
 
 .pinyin-guide__text {
   fill: #26352f;
   color: #26352f;
-  font-family: Arial, "Helvetica Neue", sans-serif;
+  font-family: Arial, "Helvetica Neue", sans-serif !important;
   font-size: 26px;
-  font-weight: 400;
+  font-weight: 400 !important;
+  font-style: normal;
+  font-synthesis: none;
+  text-rendering: geometricPrecision;
   font-variant-ligatures: none;
   letter-spacing: -0.35px;
+  transform: scaleX(0.64);
+  transform-origin: center;
+  transform-box: fill-box;
 }
 
 
