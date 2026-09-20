@@ -220,8 +220,8 @@ const cellsByWord = computed<DictationCell[][]>(() => {
 
 const rows = computed(() => packDictationWords(cellsByWord.value))
 
-// 词语之间保留适中间距：比完整空格格小，避免词组之间被拉得过开。
-const wordSpacerTrack = '0.45fr'
+// 词语之间只保留较窄的适中留白，避免词组被拉得过开。
+const wordSpacerTrack = '0.2fr'
 function rowGridTemplate(row: readonly (DictationCell | null)[]): string {
   const contentTracks: string[] = row.map(cell => cell ? 'minmax(0, 1fr)' : wordSpacerTrack)
   const minimumTracks = Math.max(8, row.length)
