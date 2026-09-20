@@ -220,8 +220,8 @@ const cellsByWord = computed<DictationCell[][]>(() => {
 
 const rows = computed(() => packDictationWords(cellsByWord.value))
 
-// 格子按实际尺寸紧凑排列，词语之间只保留约 0.2 格的留白。
-const wordSpacerTrack = 'calc(var(--dictation-cell-size) * 0.2)'
+// 格子按实际尺寸紧凑排列，词语之间保留清晰但不过宽的留白。
+const wordSpacerTrack = 'calc(var(--dictation-cell-size) * 0.35)'
 function rowGridTemplate(row: readonly (DictationCell | null)[]): string {
   return row
     .map(cell => cell ? 'var(--dictation-cell-size)' : wordSpacerTrack)
@@ -299,12 +299,16 @@ const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + w
 }
 
 .chinese-sheet__grid {
+  width: fit-content;
+  max-width: 100%;
   border-top: 1px solid #dce3df;
   border-left: 1px solid #dce3df;
 }
 
 .chinese-sheet__row {
   display: grid;
+  width: fit-content;
+  max-width: 100%;
   gap: 0;
   padding: 8px 10px;
   border-right: 1px solid #dce3df;
