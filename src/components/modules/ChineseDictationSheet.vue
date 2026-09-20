@@ -1,5 +1,5 @@
 <template>
-  <section class="chinese-sheet">
+  <section class="chinese-sheet" :style="{ '--dictation-cell-size': gridSize + 'px' }">
     <header class="chinese-sheet__header">
       <h1>语文默写 · {{ modeTitle }}</h1>
       <div class="chinese-sheet__meta">
@@ -12,7 +12,7 @@
 
     <div class="chinese-sheet__guide">
       <span>{{ guidePrimary }}</span>
-      <span>按词语分组，超过 8 格自动换行</span>
+      <span>词间适中留白，放不下时整词换行</span>
     </div>
 
     <div v-if="rows.length" class="chinese-sheet__grid">
@@ -20,15 +20,20 @@
         v-for="(row, rowIndex) in rows"
         :key="rowIndex"
         class="chinese-sheet__row"
+        :style="{ gridTemplateColumns: rowGridTemplate(row) }"
       >
         <div
           v-for="(cell, cellIndex) in row"
-          :key="`${rowIndex}-${cellIndex}-${cell.char}`"
+          :key="`${rowIndex}-${cellIndex}`"
           class="chinese-sheet__unit"
+          :class="{ 'chinese-sheet__unit--spacer': !cell }"
+          :aria-hidden="!cell || undefined"
         >
+          <template v-if="cell">
           <PinyinGuide
             :text="showPinyin ? cell.pinyin : ''"
             :font-size="pinyinFontSize"
+            :width="gridSize"
             :height="pinyinGuideHeight"
             :top-color="gridTopColor"
             :mid-color="gridMidColor"
@@ -48,12 +53,32 @@
               :style="{ color: hanziColor, fontSize: hanziFontSize + 'px' }"
             >{{ cell.char }}</span>
           </component>
+          </template>
         </div>
       </div>
     </div>
     <div v-else class="chinese-sheet__empty">
-      在左侧输入汉字后，这里会按每行 8 格生成默写纸。
+      在左侧每行输入一个词语，词间适中留白，放不下时整词换行。
     </div>
+
+    <section class="chinese-sheet__correction" aria-label="订正区域">
+      <h2 class="chinese-sheet__correction-title">订正区域</h2>
+      <div
+        v-for="rowIndex in correctionRowCount"
+        :key="`correction-${rowIndex}`"
+        class="chinese-sheet__correction-row"
+      >
+        <component
+          v-for="cellIndex in correctionCellsPerRow"
+          :key="`correction-${rowIndex}-${cellIndex}`"
+          :is="gridComponent"
+          :size="gridSize"
+          :border-color="gridColor"
+          :guide-color="guideColor"
+          class="chinese-sheet__correction-cell"
+        />
+      </div>
+    </section>
 
     <footer class="chinese-sheet__footer">
       <span>{{ footerText }}</span>
@@ -66,6 +91,7 @@
 import { computed } from 'vue'
 import type { DictationDisplayMode, DictationSubMode, GridType, WorksheetConfig } from '@/types/worksheet'
 import { usePinyin } from '@/composables/usePinyin'
+import { packDictationWords } from '@/utils/dictationLayout'
 import PinyinGuide from '@/components/grids/PinyinGuide.vue'
 import TianziGrid from '@/components/grids/TianziGrid.vue'
 import MiziGrid from '@/components/grids/MiziGrid.vue'
@@ -152,15 +178,11 @@ const guideColor = computed(() => {
   return `${props.gridColor}66`
 })
 
-const wordSeparator = /[\s,，、;；。.!！?？]+/u
-
 function contentWordLines(text: string): string[][] {
-  return text.split(/\r?\n/u).map(line =>
-    line
-      .split(wordSeparator)
-      .map(word => Array.from(word).filter(isChinese).join(''))
-      .filter(Boolean),
-  )
+  return text.split(/\r?\n/u).map(line => {
+    const word = Array.from(line).filter(isChinese).join('')
+    return word ? [word] : []
+  })
 }
 
 function manualPinyinWords(text: string): string[][] {
@@ -197,30 +219,21 @@ const cellsByWord = computed<DictationCell[][]>(() => {
   })
 })
 
-const rows = computed<DictationCell[][]>(() => {
-  const result: DictationCell[][] = []
-  let row: DictationCell[] = []
+const rows = computed(() => packDictationWords(cellsByWord.value))
 
-  const flush = () => {
-    if (row.length) result.push(row)
-    row = []
+// 词语之间保留适中间距：比完整空格格小，避免词组之间被拉得过开。
+const wordSpacerTrack = '0.45fr'
+function rowGridTemplate(row: readonly (DictationCell | null)[]): string {
+  const contentTracks: string[] = row.map(cell => cell ? 'minmax(0, 1fr)' : wordSpacerTrack)
+  const minimumTracks = Math.max(8, row.length)
+  if (contentTracks.length < minimumTracks) {
+    contentTracks.push(`repeat(${minimumTracks - contentTracks.length}, minmax(0, 1fr))`)
   }
+  return contentTracks.join(' ')
+}
 
-  for (const word of cellsByWord.value) {
-    if (word.length <= 8 && row.length && row.length + word.length > 8) flush()
-
-    let offset = 0
-    while (offset < word.length) {
-      const free = 8 - row.length
-      row.push(...word.slice(offset, offset + free))
-      offset += free
-      if (row.length === 8) flush()
-    }
-  }
-
-  flush()
-  return result
-})
+const correctionRowCount = 2
+const correctionCellsPerRow = 8
 
 const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + word.length, 0))
 </script>
@@ -296,7 +309,6 @@ const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + w
 
 .chinese-sheet__row {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 5px;
   padding: 8px 10px;
   border-right: 1px solid #dce3df;
@@ -313,11 +325,42 @@ const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + w
 .chinese-sheet__hanzi-grid {
   margin: 4px auto 0;
   flex-shrink: 0;
+  width: var(--dictation-cell-size) !important;
+  height: var(--dictation-cell-size) !important;
 }
 
 .chinese-sheet__hanzi {
   color: #b8b8b8;
   font: 28px/1 var(--font-kai);
+}
+
+.chinese-sheet__correction {
+  margin-top: 14px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.chinese-sheet__correction-title {
+  margin: 0;
+  padding: 5px 10px;
+  border: 1px solid #cad7d0;
+  color: #267a56;
+  background: #f2faf5;
+  font: 700 12px/1.2 var(--font-kai);
+}
+
+.chinese-sheet__correction-row {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0;
+  padding: 8px 10px 0;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.chinese-sheet__correction-cell {
+  width: 100% !important;
+  height: var(--dictation-cell-size) !important;
 }
 
 .chinese-sheet__empty {

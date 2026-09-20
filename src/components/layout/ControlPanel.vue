@@ -237,7 +237,7 @@
 
         <div class="panel-block">
           <div class="block-title">纸张规格</div>
-          <div class="dictation-paper-spec">A4 竖版 · 每行 8 格 · 拼音在上、田字格在下</div>
+          <div class="dictation-paper-spec">A4 竖版 · 常规每行 8 格（含词间空格） · 整词换行</div>
         </div>
 
         <div class="panel-block">
@@ -305,11 +305,11 @@
 
         <div class="panel-block dictation-tool-block">
           <div class="block-title">汉字转拼音</div>
-          <div class="tool-hint">每行输入一个词语，自动生成带声调拼音。</div>
+          <div class="tool-hint">每行输入一个词语，词间适中留白；放不下时整词换行。</div>
           <textarea
             class="content-ta tool-input"
             :value="config.dictationContent"
-            placeholder="如：爸爸 皮球 古诗"
+            :placeholder="'如：爸爸\n皮球\n古诗'"
             rows="4"
             @input="updateDictationSource"
           />

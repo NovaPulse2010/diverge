@@ -48,6 +48,8 @@ const props = withDefaults(
     lineStyle?: 'dashed' | 'solid'
     height?: number
     fontSize?: number
+    /** Optional cell width for compact, shrink-to-fit dictation rows. */
+    width?: number
   }>(),
   {
     text: '',
@@ -69,7 +71,11 @@ const lineBottom = computed(() => props.height - 0.5)
 const textStyle = computed(() => {
   const length = Array.from(props.text).length
   const scale = length >= 7 ? 0.76 : length >= 5 ? 0.88 : 1
-  return { fontSize: `${Math.round(props.fontSize * scale)}px` }
+  const requestedSize = Math.round(props.fontSize * scale)
+  const fittedSize = props.width
+    ? Math.min(requestedSize, (props.width - 4) / Math.max(1, length * 0.62))
+    : requestedSize
+  return { fontSize: `${fittedSize}px` }
 })
 </script>
 
