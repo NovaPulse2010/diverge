@@ -220,15 +220,12 @@ const cellsByWord = computed<DictationCell[][]>(() => {
 
 const rows = computed(() => packDictationWords(cellsByWord.value))
 
-// 词语之间只保留较窄的适中留白，避免词组被拉得过开。
-const wordSpacerTrack = '0.2fr'
+// 格子按实际尺寸紧凑排列，词语之间只保留约 0.2 格的留白。
+const wordSpacerTrack = 'calc(var(--dictation-cell-size) * 0.2)'
 function rowGridTemplate(row: readonly (DictationCell | null)[]): string {
-  const contentTracks: string[] = row.map(cell => cell ? 'minmax(0, 1fr)' : wordSpacerTrack)
-  const minimumTracks = Math.max(8, row.length)
-  if (contentTracks.length < minimumTracks) {
-    contentTracks.push(`repeat(${minimumTracks - contentTracks.length}, minmax(0, 1fr))`)
-  }
-  return contentTracks.join(' ')
+  return row
+    .map(cell => cell ? 'var(--dictation-cell-size)' : wordSpacerTrack)
+    .join(' ')
 }
 
 const correctionRowCount = 2
@@ -308,7 +305,7 @@ const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + w
 
 .chinese-sheet__row {
   display: grid;
-  gap: 5px;
+  gap: 0;
   padding: 8px 10px;
   border-right: 1px solid #dce3df;
   border-bottom: 1px solid #dce3df;
@@ -350,7 +347,7 @@ const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + w
 
 .chinese-sheet__correction-row {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(8, var(--dictation-cell-size));
   gap: 0;
   padding: 8px 10px 0;
   break-inside: avoid;
@@ -358,7 +355,7 @@ const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + w
 }
 
 .chinese-sheet__correction-cell {
-  width: 100% !important;
+  width: var(--dictation-cell-size) !important;
   height: var(--dictation-cell-size) !important;
 }
 
