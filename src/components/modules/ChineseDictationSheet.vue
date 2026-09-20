@@ -33,7 +33,6 @@
           <PinyinGuide
             :text="showPinyin ? cell.pinyin : ''"
             :font-size="pinyinFontSize"
-            :width="gridSize"
             :height="pinyinGuideHeight"
             :top-color="gridTopColor"
             :mid-color="gridMidColor"
