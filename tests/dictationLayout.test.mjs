@@ -34,3 +34,10 @@ test('preserves every character in input order', () => {
   const words = ['专卖', '古董', '一溜烟', '各式各样', '方方正正', '人山人海', '密密麻麻', '大吃一惊']
   assert.equal(pack(words).flat().filter(Boolean).join(''), words.join(''))
 })
+
+test('uses a fractional separator when packing to the actual row width', () => {
+  assert.deepEqual(
+    textRows(packDictationWords(['帽子', '橱窗', '脑袋', '书包', '香蕉', '春天'].map(word => Array.from(word)), 12, 0.35)),
+    ['帽子 橱窗 脑袋 书包 香蕉', '春天'],
+  )
+})

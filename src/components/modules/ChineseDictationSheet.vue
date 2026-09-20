@@ -1,5 +1,5 @@
 <template>
-  <section class="chinese-sheet" :style="{ '--dictation-cell-size': gridSize + 'px' }">
+  <section ref="sheetRef" class="chinese-sheet" :style="{ '--dictation-cell-size': gridSize + 'px' }">
     <header class="chinese-sheet__header">
       <h1>语文默写 · {{ modeTitle }}</h1>
       <div class="chinese-sheet__meta">
@@ -33,6 +33,7 @@
           <PinyinGuide
             :text="showPinyin ? cell.pinyin : ''"
             :font-size="pinyinFontSize"
+            :width="gridSize"
             :height="pinyinGuideHeight"
             :top-color="gridTopColor"
             :mid-color="gridMidColor"
@@ -87,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { DictationDisplayMode, DictationSubMode, GridType, WorksheetConfig } from '@/types/worksheet'
 import { usePinyin } from '@/composables/usePinyin'
 import { packDictationWords } from '@/utils/dictationLayout'
@@ -218,10 +219,32 @@ const cellsByWord = computed<DictationCell[][]>(() => {
   })
 })
 
-const rows = computed(() => packDictationWords(cellsByWord.value))
+const sheetRef = ref<HTMLElement | null>(null)
+const sheetWidth = ref(0)
+const wordSpacerRatio = 0.35
+
+let resizeObserver: ResizeObserver | undefined
+onMounted(() => {
+  const sheet = sheetRef.value
+  if (!sheet) return
+  const updateWidth = () => { sheetWidth.value = sheet.clientWidth }
+  updateWidth()
+  resizeObserver = new ResizeObserver(updateWidth)
+  resizeObserver.observe(sheet)
+})
+
+onBeforeUnmount(() => resizeObserver?.disconnect())
+
+// 根据纸张实际宽度计算可用的“格子单位”，不再固定每行只能放 8 格。
+const rowCapacity = computed(() => {
+  if (!sheetWidth.value) return 8
+  const horizontalPadding = 20
+  return Math.max(1, (sheetWidth.value - horizontalPadding) / props.gridSize)
+})
+const rows = computed(() => packDictationWords(cellsByWord.value, rowCapacity.value, wordSpacerRatio))
 
 // 格子按实际尺寸紧凑排列，词语之间保留清晰但不过宽的留白。
-const wordSpacerTrack = 'calc(var(--dictation-cell-size) * 0.35)'
+const wordSpacerTrack = `calc(var(--dictation-cell-size) * ${wordSpacerRatio})`
 function rowGridTemplate(row: readonly (DictationCell | null)[]): string {
   return row
     .map(cell => cell ? 'var(--dictation-cell-size)' : wordSpacerTrack)
@@ -299,7 +322,7 @@ const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + w
 }
 
 .chinese-sheet__grid {
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
   border-top: 1px solid #dce3df;
   border-left: 1px solid #dce3df;
@@ -307,8 +330,9 @@ const cellCount = computed(() => cellsByWord.value.reduce((sum, word) => sum + w
 
 .chinese-sheet__row {
   display: grid;
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   gap: 0;
   padding: 8px 10px;
   border-right: 1px solid #dce3df;

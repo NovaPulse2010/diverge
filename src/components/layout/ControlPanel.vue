@@ -237,7 +237,7 @@
 
         <div class="panel-block">
           <div class="block-title">纸张规格</div>
-          <div class="dictation-paper-spec">A4 竖版 · 常规每行 8 格（含词间空格） · 整词换行</div>
+          <div class="dictation-paper-spec">A4 竖版 · 按纸张宽度排版 · 整词换行</div>
         </div>
 
         <div class="panel-block">

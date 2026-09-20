@@ -30,6 +30,8 @@
       :y="lineBaseline"
       class="pinyin-guide__text"
       :style="textStyle"
+      :textLength="textLength"
+      lengthAdjust="spacingAndGlyphs"
       dominant-baseline="alphabetic"
       text-anchor="middle"
     >{{ text }}</text>
@@ -48,6 +50,7 @@ const props = withDefaults(
     lineStyle?: 'dashed' | 'solid'
     height?: number
     fontSize?: number
+    width?: number
   }>(),
   {
     text: '',
@@ -57,6 +60,7 @@ const props = withDefaults(
     lineStyle: 'solid',
     height: 43,
     fontSize: 26,
+    width: 52,
   },
 )
 
@@ -65,6 +69,14 @@ const lineTop = computed(() => 0.5)
 const lineUpper = computed(() => Math.round(props.height / 3) + 0.5)
 const lineBaseline = computed(() => Math.round(props.height * 2 / 3) + 0.5)
 const lineBottom = computed(() => props.height - 0.5)
+
+const textLength = computed(() => {
+  if (!props.text) return undefined
+  const length = Array.from(props.text).length
+  const scale = length >= 7 ? 0.76 : length >= 5 ? 0.88 : 1
+  const estimatedWidth = length * props.fontSize * 0.58 * scale
+  return Math.min(estimatedWidth, props.width * 0.86)
+})
 
 const textStyle = computed(() => {
   const length = Array.from(props.text).length
@@ -78,7 +90,7 @@ const textStyle = computed(() => {
   display: block;
   width: 100%;
   height: 43px;
-  overflow: visible;
+  overflow: hidden;
   color: #26352f;
 }
 

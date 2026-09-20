@@ -14,10 +14,6 @@ const { config, updateConfig, applyPreset, presets } = useWorksheet();
 const dictationCellCount = computed(() =>
   config.dictationContent.replace(/\s+/g, '').length,
 );
-const dictationRowCount = computed(() =>
-  Math.max(1, Math.ceil(dictationCellCount.value / 8)),
-);
-
 const worksheetTitle = computed(() => {
   if (config.module === "dictation") {
     switch (config.dictationMode) {
@@ -61,7 +57,7 @@ const worksheetTitle = computed(() => {
     <main class="preview-area">
       <div v-if="config.module === 'dictation' && config.subject === 'yuwen'" class="dictation-preview-status">
         <span>打印预览 · A4</span>
-        <span>每行 8 格 · {{ dictationCellCount }} 格 / {{ dictationRowCount }} 行</span>
+        <span>按纸张宽度自动排版 · {{ dictationCellCount }} 格</span>
       </div>
       <WorksheetPage
         :show-meta="
