@@ -41,3 +41,17 @@ export function packDictationWords<T>(
   if (row.length) rows.push(row)
   return rows
 }
+
+/** Keep character tracks fixed; share the remaining row width only between words. */
+export function dictationRowTemplate<T>(
+  row: readonly (T | null)[],
+  cellSize: number,
+  characterGap: number,
+  minimumWordGap: number,
+): string {
+  return row.map((cell, index) => {
+    if (cell === null) return `minmax(${minimumWordGap}px, 1fr)`
+    const hasNextCharacter = index + 1 < row.length && row[index + 1] !== null
+    return `${cellSize + (hasNextCharacter ? characterGap : 0)}px`
+  }).join(' ')
+}

@@ -92,7 +92,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { DictationDisplayMode, DictationSubMode, GridType, WorksheetConfig } from '@/types/worksheet'
 import { usePinyin } from '@/composables/usePinyin'
-import { packDictationWords } from '@/utils/dictationLayout'
+import { dictationRowTemplate, packDictationWords } from '@/utils/dictationLayout'
 import PinyinGuide from '@/components/grids/PinyinGuide.vue'
 import TianziGrid from '@/components/grids/TianziGrid.vue'
 import MiziGrid from '@/components/grids/MiziGrid.vue'
@@ -250,17 +250,9 @@ const rows = computed(() => packDictationWords(
   characterGap / props.gridSize,
 ))
 
-// 格子按实际尺寸紧凑排列，词语之间保留清晰但不过宽的留白。
-const wordSpacerTrack = `calc(var(--dictation-cell-size) * ${wordSpacerRatio})`
+// 字格和词内间距固定；剩余宽度仅在词与词之间等分。
 function rowGridTemplate(row: readonly (DictationCell | null)[]): string {
-  return row
-    .map((cell, index) => {
-      if (!cell) return wordSpacerTrack
-      return row[index + 1]
-        ? `calc(var(--dictation-cell-size) + ${characterGap}px)`
-        : 'var(--dictation-cell-size)'
-    })
-    .join(' ')
+  return dictationRowTemplate(row, props.gridSize, characterGap, props.gridSize * wordSpacerRatio)
 }
 
 const correctionRowCount = 2

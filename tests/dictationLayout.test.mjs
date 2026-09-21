@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { packDictationWords } from '../src/utils/dictationLayout.ts'
+import { dictationRowTemplate, packDictationWords } from '../src/utils/dictationLayout.ts'
 
 const pack = words => packDictationWords(words.map(word => Array.from(word)))
 const textRows = rows => rows.map(row => row.map(char => char ?? ' ').join(''))
@@ -64,4 +64,22 @@ test('single characters have no internal gap and four-character words stay intac
   const words = ['春', '夏', '各式各样', '秋'].map(word => Array.from(word))
   assert.deepEqual(textRows(packDictationWords(words, 223 / 52, 0.35, 5 / 52)),
     ['春 夏', '各式各样', '秋'])
+})
+
+test('word separators share remaining width equally while character tracks remain fixed', () => {
+  const row = ['春', null, '帽', '子', null, '一', '溜', '烟']
+  assert.equal(dictationRowTemplate(row, 52, 10, 18.2),
+    '52px minmax(18.2px, 1fr) 62px 52px minmax(18.2px, 1fr) 62px 62px 52px')
+})
+
+test('a single word stays left aligned without stretching its character spacing', () => {
+  assert.equal(dictationRowTemplate(['各', '式', '各', '样'], 52, 10, 18.2),
+    '62px 62px 62px 52px')
+  assert.equal(dictationRowTemplate(['春'], 52, 10, 18.2), '52px')
+  assert.equal(dictationRowTemplate([], 52, 10, 18.2), '')
+})
+
+test('word spacing adapts to the selected cell size with the same internal 10px gap', () => {
+  assert.equal(dictationRowTemplate(['帽', '子', null, '春'], 60, 10, 21),
+    '70px 60px minmax(21px, 1fr) 60px')
 })
