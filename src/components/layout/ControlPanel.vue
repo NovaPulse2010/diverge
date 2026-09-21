@@ -261,7 +261,7 @@
             <label class="field">
               <span class="field-label">四线间距</span>
               <div class="row-col-stepper">
-                <button class="step-btn" :disabled="config.dictationPinyinGuideHeight <= 36" @click="updateConfig({ dictationPinyinGuideHeight: config.dictationPinyinGuideHeight - 1 })">−</button>
+                <button class="step-btn" :disabled="config.dictationPinyinGuideHeight <= 24" @click="updateConfig({ dictationPinyinGuideHeight: config.dictationPinyinGuideHeight - 1 })">−</button>
                 <span class="step-val">{{ config.dictationPinyinGuideHeight }}px</span>
                 <button class="step-btn" :disabled="config.dictationPinyinGuideHeight >= 56" @click="updateConfig({ dictationPinyinGuideHeight: config.dictationPinyinGuideHeight + 1 })">+</button>
               </div>
